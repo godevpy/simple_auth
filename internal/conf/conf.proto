@@ -8,6 +8,12 @@ import "google/protobuf/duration.proto";
 message Bootstrap {
   Server server = 1;
   Data data = 2;
+  Templates templates = 3;
+  Session session = 4;
+  repeated User users = 5;
+  Authorization authorization = 6;
+  Security security = 7;
+  Logging logging = 8;
 }
 
 message Server {
@@ -35,7 +41,80 @@ message Data {
     string addr = 2;
     google.protobuf.Duration read_timeout = 3;
     google.protobuf.Duration write_timeout = 4;
+    string username = 5;
+    string password = 6;
+    int32 db = 7;
+    string key_prefix = 8;
   }
   Database database = 1;
   Redis redis = 2;
+}
+
+message Templates {
+  string login_page = 1;
+}
+
+message Session {
+  string cookie_name = 1;
+  string cookie_domain = 2;
+  google.protobuf.Duration idle_timeout = 3;
+  google.protobuf.Duration absolute_timeout = 4;
+  bool sliding_expiration = 5;
+  bool secure_cookie = 6;
+  string same_site = 7;
+  bool per_host_namespace = 8;
+}
+
+message User {
+  string id = 1;
+  string username = 2;
+  string display_name = 3;
+  string password_hash = 4;
+  repeated string groups = 5;
+}
+
+message Authorization {
+  message Rule {
+    string name = 1;
+    repeated string hosts = 2;
+    string path_match = 3;
+    repeated string paths = 4;
+    repeated string methods = 5;
+    repeated string allow_groups = 6;
+    repeated string allow_users = 7;
+    repeated string allow_user_ids = 8;
+  }
+  bool enabled = 1;
+  string mode = 2;
+  repeated Rule rules = 3;
+}
+
+message Security {
+  message LoginFailure {
+    int32 max_attempts = 1;
+    google.protobuf.Duration window = 2;
+    google.protobuf.Duration ban_duration = 3;
+    bool ban_ip = 4;
+    bool ban_user = 5;
+    bool user_whitelist_enabled = 6;
+    repeated string user_whitelist = 7;
+    bool ban_ip_on_non_whitelisted_user = 8;
+    string password_attempt_audit = 9;
+    string password_attempt_hmac_secret = 10;
+  }
+  LoginFailure login_failure = 1;
+  repeated string allow_redirect_hosts = 2;
+}
+
+message Logging {
+  message Audit {
+    string login_failure_dir = 1;
+    string login_failure_file_pattern = 2;
+    string login_failure_rotate = 3;
+    string login_failure_retention = 4;
+    string file_mode = 5;
+    string dir_mode = 6;
+  }
+  string level = 1;
+  Audit audit = 2;
 }

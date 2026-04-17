@@ -26,6 +26,12 @@ type Bootstrap struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Server        *Server                `protobuf:"bytes,1,opt,name=server,proto3" json:"server,omitempty"`
 	Data          *Data                  `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	Templates     *Templates             `protobuf:"bytes,3,opt,name=templates,proto3" json:"templates,omitempty"`
+	Session       *Session               `protobuf:"bytes,4,opt,name=session,proto3" json:"session,omitempty"`
+	Users         []*User                `protobuf:"bytes,5,rep,name=users,proto3" json:"users,omitempty"`
+	Authorization *Authorization         `protobuf:"bytes,6,opt,name=authorization,proto3" json:"authorization,omitempty"`
+	Security      *Security              `protobuf:"bytes,7,opt,name=security,proto3" json:"security,omitempty"`
+	Logging       *Logging               `protobuf:"bytes,8,opt,name=logging,proto3" json:"logging,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -70,6 +76,48 @@ func (x *Bootstrap) GetServer() *Server {
 func (x *Bootstrap) GetData() *Data {
 	if x != nil {
 		return x.Data
+	}
+	return nil
+}
+
+func (x *Bootstrap) GetTemplates() *Templates {
+	if x != nil {
+		return x.Templates
+	}
+	return nil
+}
+
+func (x *Bootstrap) GetSession() *Session {
+	if x != nil {
+		return x.Session
+	}
+	return nil
+}
+
+func (x *Bootstrap) GetUsers() []*User {
+	if x != nil {
+		return x.Users
+	}
+	return nil
+}
+
+func (x *Bootstrap) GetAuthorization() *Authorization {
+	if x != nil {
+		return x.Authorization
+	}
+	return nil
+}
+
+func (x *Bootstrap) GetSecurity() *Security {
+	if x != nil {
+		return x.Security
+	}
+	return nil
+}
+
+func (x *Bootstrap) GetLogging() *Logging {
+	if x != nil {
+		return x.Logging
 	}
 	return nil
 }
@@ -178,6 +226,390 @@ func (x *Data) GetRedis() *Data_Redis {
 	return nil
 }
 
+type Templates struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	LoginPage     string                 `protobuf:"bytes,1,opt,name=login_page,json=loginPage,proto3" json:"login_page,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Templates) Reset() {
+	*x = Templates{}
+	mi := &file_conf_conf_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Templates) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Templates) ProtoMessage() {}
+
+func (x *Templates) ProtoReflect() protoreflect.Message {
+	mi := &file_conf_conf_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Templates.ProtoReflect.Descriptor instead.
+func (*Templates) Descriptor() ([]byte, []int) {
+	return file_conf_conf_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Templates) GetLoginPage() string {
+	if x != nil {
+		return x.LoginPage
+	}
+	return ""
+}
+
+type Session struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	CookieName        string                 `protobuf:"bytes,1,opt,name=cookie_name,json=cookieName,proto3" json:"cookie_name,omitempty"`
+	CookieDomain      string                 `protobuf:"bytes,2,opt,name=cookie_domain,json=cookieDomain,proto3" json:"cookie_domain,omitempty"`
+	IdleTimeout       *durationpb.Duration   `protobuf:"bytes,3,opt,name=idle_timeout,json=idleTimeout,proto3" json:"idle_timeout,omitempty"`
+	AbsoluteTimeout   *durationpb.Duration   `protobuf:"bytes,4,opt,name=absolute_timeout,json=absoluteTimeout,proto3" json:"absolute_timeout,omitempty"`
+	SlidingExpiration bool                   `protobuf:"varint,5,opt,name=sliding_expiration,json=slidingExpiration,proto3" json:"sliding_expiration,omitempty"`
+	SecureCookie      bool                   `protobuf:"varint,6,opt,name=secure_cookie,json=secureCookie,proto3" json:"secure_cookie,omitempty"`
+	SameSite          string                 `protobuf:"bytes,7,opt,name=same_site,json=sameSite,proto3" json:"same_site,omitempty"`
+	PerHostNamespace  bool                   `protobuf:"varint,8,opt,name=per_host_namespace,json=perHostNamespace,proto3" json:"per_host_namespace,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *Session) Reset() {
+	*x = Session{}
+	mi := &file_conf_conf_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Session) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Session) ProtoMessage() {}
+
+func (x *Session) ProtoReflect() protoreflect.Message {
+	mi := &file_conf_conf_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Session.ProtoReflect.Descriptor instead.
+func (*Session) Descriptor() ([]byte, []int) {
+	return file_conf_conf_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Session) GetCookieName() string {
+	if x != nil {
+		return x.CookieName
+	}
+	return ""
+}
+
+func (x *Session) GetCookieDomain() string {
+	if x != nil {
+		return x.CookieDomain
+	}
+	return ""
+}
+
+func (x *Session) GetIdleTimeout() *durationpb.Duration {
+	if x != nil {
+		return x.IdleTimeout
+	}
+	return nil
+}
+
+func (x *Session) GetAbsoluteTimeout() *durationpb.Duration {
+	if x != nil {
+		return x.AbsoluteTimeout
+	}
+	return nil
+}
+
+func (x *Session) GetSlidingExpiration() bool {
+	if x != nil {
+		return x.SlidingExpiration
+	}
+	return false
+}
+
+func (x *Session) GetSecureCookie() bool {
+	if x != nil {
+		return x.SecureCookie
+	}
+	return false
+}
+
+func (x *Session) GetSameSite() string {
+	if x != nil {
+		return x.SameSite
+	}
+	return ""
+}
+
+func (x *Session) GetPerHostNamespace() bool {
+	if x != nil {
+		return x.PerHostNamespace
+	}
+	return false
+}
+
+type User struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	DisplayName   string                 `protobuf:"bytes,3,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	PasswordHash  string                 `protobuf:"bytes,4,opt,name=password_hash,json=passwordHash,proto3" json:"password_hash,omitempty"`
+	Groups        []string               `protobuf:"bytes,5,rep,name=groups,proto3" json:"groups,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *User) Reset() {
+	*x = User{}
+	mi := &file_conf_conf_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *User) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*User) ProtoMessage() {}
+
+func (x *User) ProtoReflect() protoreflect.Message {
+	mi := &file_conf_conf_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use User.ProtoReflect.Descriptor instead.
+func (*User) Descriptor() ([]byte, []int) {
+	return file_conf_conf_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *User) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *User) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *User) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+func (x *User) GetPasswordHash() string {
+	if x != nil {
+		return x.PasswordHash
+	}
+	return ""
+}
+
+func (x *User) GetGroups() []string {
+	if x != nil {
+		return x.Groups
+	}
+	return nil
+}
+
+type Authorization struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Enabled       bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	Mode          string                 `protobuf:"bytes,2,opt,name=mode,proto3" json:"mode,omitempty"`
+	Rules         []*Authorization_Rule  `protobuf:"bytes,3,rep,name=rules,proto3" json:"rules,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Authorization) Reset() {
+	*x = Authorization{}
+	mi := &file_conf_conf_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Authorization) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Authorization) ProtoMessage() {}
+
+func (x *Authorization) ProtoReflect() protoreflect.Message {
+	mi := &file_conf_conf_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Authorization.ProtoReflect.Descriptor instead.
+func (*Authorization) Descriptor() ([]byte, []int) {
+	return file_conf_conf_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *Authorization) GetEnabled() bool {
+	if x != nil {
+		return x.Enabled
+	}
+	return false
+}
+
+func (x *Authorization) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
+
+func (x *Authorization) GetRules() []*Authorization_Rule {
+	if x != nil {
+		return x.Rules
+	}
+	return nil
+}
+
+type Security struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	LoginFailure       *Security_LoginFailure `protobuf:"bytes,1,opt,name=login_failure,json=loginFailure,proto3" json:"login_failure,omitempty"`
+	AllowRedirectHosts []string               `protobuf:"bytes,2,rep,name=allow_redirect_hosts,json=allowRedirectHosts,proto3" json:"allow_redirect_hosts,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *Security) Reset() {
+	*x = Security{}
+	mi := &file_conf_conf_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Security) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Security) ProtoMessage() {}
+
+func (x *Security) ProtoReflect() protoreflect.Message {
+	mi := &file_conf_conf_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Security.ProtoReflect.Descriptor instead.
+func (*Security) Descriptor() ([]byte, []int) {
+	return file_conf_conf_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *Security) GetLoginFailure() *Security_LoginFailure {
+	if x != nil {
+		return x.LoginFailure
+	}
+	return nil
+}
+
+func (x *Security) GetAllowRedirectHosts() []string {
+	if x != nil {
+		return x.AllowRedirectHosts
+	}
+	return nil
+}
+
+type Logging struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Level         string                 `protobuf:"bytes,1,opt,name=level,proto3" json:"level,omitempty"`
+	Audit         *Logging_Audit         `protobuf:"bytes,2,opt,name=audit,proto3" json:"audit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Logging) Reset() {
+	*x = Logging{}
+	mi := &file_conf_conf_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Logging) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Logging) ProtoMessage() {}
+
+func (x *Logging) ProtoReflect() protoreflect.Message {
+	mi := &file_conf_conf_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Logging.ProtoReflect.Descriptor instead.
+func (*Logging) Descriptor() ([]byte, []int) {
+	return file_conf_conf_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *Logging) GetLevel() string {
+	if x != nil {
+		return x.Level
+	}
+	return ""
+}
+
+func (x *Logging) GetAudit() *Logging_Audit {
+	if x != nil {
+		return x.Audit
+	}
+	return nil
+}
+
 type Server_HTTP struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Network       string                 `protobuf:"bytes,1,opt,name=network,proto3" json:"network,omitempty"`
@@ -189,7 +621,7 @@ type Server_HTTP struct {
 
 func (x *Server_HTTP) Reset() {
 	*x = Server_HTTP{}
-	mi := &file_conf_conf_proto_msgTypes[3]
+	mi := &file_conf_conf_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -201,7 +633,7 @@ func (x *Server_HTTP) String() string {
 func (*Server_HTTP) ProtoMessage() {}
 
 func (x *Server_HTTP) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[3]
+	mi := &file_conf_conf_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -249,7 +681,7 @@ type Server_GRPC struct {
 
 func (x *Server_GRPC) Reset() {
 	*x = Server_GRPC{}
-	mi := &file_conf_conf_proto_msgTypes[4]
+	mi := &file_conf_conf_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -261,7 +693,7 @@ func (x *Server_GRPC) String() string {
 func (*Server_GRPC) ProtoMessage() {}
 
 func (x *Server_GRPC) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[4]
+	mi := &file_conf_conf_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -308,7 +740,7 @@ type Data_Database struct {
 
 func (x *Data_Database) Reset() {
 	*x = Data_Database{}
-	mi := &file_conf_conf_proto_msgTypes[5]
+	mi := &file_conf_conf_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -320,7 +752,7 @@ func (x *Data_Database) String() string {
 func (*Data_Database) ProtoMessage() {}
 
 func (x *Data_Database) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[5]
+	mi := &file_conf_conf_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -356,13 +788,17 @@ type Data_Redis struct {
 	Addr          string                 `protobuf:"bytes,2,opt,name=addr,proto3" json:"addr,omitempty"`
 	ReadTimeout   *durationpb.Duration   `protobuf:"bytes,3,opt,name=read_timeout,json=readTimeout,proto3" json:"read_timeout,omitempty"`
 	WriteTimeout  *durationpb.Duration   `protobuf:"bytes,4,opt,name=write_timeout,json=writeTimeout,proto3" json:"write_timeout,omitempty"`
+	Username      string                 `protobuf:"bytes,5,opt,name=username,proto3" json:"username,omitempty"`
+	Password      string                 `protobuf:"bytes,6,opt,name=password,proto3" json:"password,omitempty"`
+	Db            int32                  `protobuf:"varint,7,opt,name=db,proto3" json:"db,omitempty"`
+	KeyPrefix     string                 `protobuf:"bytes,8,opt,name=key_prefix,json=keyPrefix,proto3" json:"key_prefix,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Data_Redis) Reset() {
 	*x = Data_Redis{}
-	mi := &file_conf_conf_proto_msgTypes[6]
+	mi := &file_conf_conf_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -374,7 +810,7 @@ func (x *Data_Redis) String() string {
 func (*Data_Redis) ProtoMessage() {}
 
 func (x *Data_Redis) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[6]
+	mi := &file_conf_conf_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -418,15 +854,349 @@ func (x *Data_Redis) GetWriteTimeout() *durationpb.Duration {
 	return nil
 }
 
+func (x *Data_Redis) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *Data_Redis) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *Data_Redis) GetDb() int32 {
+	if x != nil {
+		return x.Db
+	}
+	return 0
+}
+
+func (x *Data_Redis) GetKeyPrefix() string {
+	if x != nil {
+		return x.KeyPrefix
+	}
+	return ""
+}
+
+type Authorization_Rule struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Hosts         []string               `protobuf:"bytes,2,rep,name=hosts,proto3" json:"hosts,omitempty"`
+	PathMatch     string                 `protobuf:"bytes,3,opt,name=path_match,json=pathMatch,proto3" json:"path_match,omitempty"`
+	Paths         []string               `protobuf:"bytes,4,rep,name=paths,proto3" json:"paths,omitempty"`
+	Methods       []string               `protobuf:"bytes,5,rep,name=methods,proto3" json:"methods,omitempty"`
+	AllowGroups   []string               `protobuf:"bytes,6,rep,name=allow_groups,json=allowGroups,proto3" json:"allow_groups,omitempty"`
+	AllowUsers    []string               `protobuf:"bytes,7,rep,name=allow_users,json=allowUsers,proto3" json:"allow_users,omitempty"`
+	AllowUserIds  []string               `protobuf:"bytes,8,rep,name=allow_user_ids,json=allowUserIds,proto3" json:"allow_user_ids,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Authorization_Rule) Reset() {
+	*x = Authorization_Rule{}
+	mi := &file_conf_conf_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Authorization_Rule) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Authorization_Rule) ProtoMessage() {}
+
+func (x *Authorization_Rule) ProtoReflect() protoreflect.Message {
+	mi := &file_conf_conf_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Authorization_Rule.ProtoReflect.Descriptor instead.
+func (*Authorization_Rule) Descriptor() ([]byte, []int) {
+	return file_conf_conf_proto_rawDescGZIP(), []int{6, 0}
+}
+
+func (x *Authorization_Rule) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Authorization_Rule) GetHosts() []string {
+	if x != nil {
+		return x.Hosts
+	}
+	return nil
+}
+
+func (x *Authorization_Rule) GetPathMatch() string {
+	if x != nil {
+		return x.PathMatch
+	}
+	return ""
+}
+
+func (x *Authorization_Rule) GetPaths() []string {
+	if x != nil {
+		return x.Paths
+	}
+	return nil
+}
+
+func (x *Authorization_Rule) GetMethods() []string {
+	if x != nil {
+		return x.Methods
+	}
+	return nil
+}
+
+func (x *Authorization_Rule) GetAllowGroups() []string {
+	if x != nil {
+		return x.AllowGroups
+	}
+	return nil
+}
+
+func (x *Authorization_Rule) GetAllowUsers() []string {
+	if x != nil {
+		return x.AllowUsers
+	}
+	return nil
+}
+
+func (x *Authorization_Rule) GetAllowUserIds() []string {
+	if x != nil {
+		return x.AllowUserIds
+	}
+	return nil
+}
+
+type Security_LoginFailure struct {
+	state                     protoimpl.MessageState `protogen:"open.v1"`
+	MaxAttempts               int32                  `protobuf:"varint,1,opt,name=max_attempts,json=maxAttempts,proto3" json:"max_attempts,omitempty"`
+	Window                    *durationpb.Duration   `protobuf:"bytes,2,opt,name=window,proto3" json:"window,omitempty"`
+	BanDuration               *durationpb.Duration   `protobuf:"bytes,3,opt,name=ban_duration,json=banDuration,proto3" json:"ban_duration,omitempty"`
+	BanIp                     bool                   `protobuf:"varint,4,opt,name=ban_ip,json=banIp,proto3" json:"ban_ip,omitempty"`
+	BanUser                   bool                   `protobuf:"varint,5,opt,name=ban_user,json=banUser,proto3" json:"ban_user,omitempty"`
+	UserWhitelistEnabled      bool                   `protobuf:"varint,6,opt,name=user_whitelist_enabled,json=userWhitelistEnabled,proto3" json:"user_whitelist_enabled,omitempty"`
+	UserWhitelist             []string               `protobuf:"bytes,7,rep,name=user_whitelist,json=userWhitelist,proto3" json:"user_whitelist,omitempty"`
+	BanIpOnNonWhitelistedUser bool                   `protobuf:"varint,8,opt,name=ban_ip_on_non_whitelisted_user,json=banIpOnNonWhitelistedUser,proto3" json:"ban_ip_on_non_whitelisted_user,omitempty"`
+	PasswordAttemptAudit      string                 `protobuf:"bytes,9,opt,name=password_attempt_audit,json=passwordAttemptAudit,proto3" json:"password_attempt_audit,omitempty"`
+	PasswordAttemptHmacSecret string                 `protobuf:"bytes,10,opt,name=password_attempt_hmac_secret,json=passwordAttemptHmacSecret,proto3" json:"password_attempt_hmac_secret,omitempty"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *Security_LoginFailure) Reset() {
+	*x = Security_LoginFailure{}
+	mi := &file_conf_conf_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Security_LoginFailure) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Security_LoginFailure) ProtoMessage() {}
+
+func (x *Security_LoginFailure) ProtoReflect() protoreflect.Message {
+	mi := &file_conf_conf_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Security_LoginFailure.ProtoReflect.Descriptor instead.
+func (*Security_LoginFailure) Descriptor() ([]byte, []int) {
+	return file_conf_conf_proto_rawDescGZIP(), []int{7, 0}
+}
+
+func (x *Security_LoginFailure) GetMaxAttempts() int32 {
+	if x != nil {
+		return x.MaxAttempts
+	}
+	return 0
+}
+
+func (x *Security_LoginFailure) GetWindow() *durationpb.Duration {
+	if x != nil {
+		return x.Window
+	}
+	return nil
+}
+
+func (x *Security_LoginFailure) GetBanDuration() *durationpb.Duration {
+	if x != nil {
+		return x.BanDuration
+	}
+	return nil
+}
+
+func (x *Security_LoginFailure) GetBanIp() bool {
+	if x != nil {
+		return x.BanIp
+	}
+	return false
+}
+
+func (x *Security_LoginFailure) GetBanUser() bool {
+	if x != nil {
+		return x.BanUser
+	}
+	return false
+}
+
+func (x *Security_LoginFailure) GetUserWhitelistEnabled() bool {
+	if x != nil {
+		return x.UserWhitelistEnabled
+	}
+	return false
+}
+
+func (x *Security_LoginFailure) GetUserWhitelist() []string {
+	if x != nil {
+		return x.UserWhitelist
+	}
+	return nil
+}
+
+func (x *Security_LoginFailure) GetBanIpOnNonWhitelistedUser() bool {
+	if x != nil {
+		return x.BanIpOnNonWhitelistedUser
+	}
+	return false
+}
+
+func (x *Security_LoginFailure) GetPasswordAttemptAudit() string {
+	if x != nil {
+		return x.PasswordAttemptAudit
+	}
+	return ""
+}
+
+func (x *Security_LoginFailure) GetPasswordAttemptHmacSecret() string {
+	if x != nil {
+		return x.PasswordAttemptHmacSecret
+	}
+	return ""
+}
+
+type Logging_Audit struct {
+	state                   protoimpl.MessageState `protogen:"open.v1"`
+	LoginFailureDir         string                 `protobuf:"bytes,1,opt,name=login_failure_dir,json=loginFailureDir,proto3" json:"login_failure_dir,omitempty"`
+	LoginFailureFilePattern string                 `protobuf:"bytes,2,opt,name=login_failure_file_pattern,json=loginFailureFilePattern,proto3" json:"login_failure_file_pattern,omitempty"`
+	LoginFailureRotate      string                 `protobuf:"bytes,3,opt,name=login_failure_rotate,json=loginFailureRotate,proto3" json:"login_failure_rotate,omitempty"`
+	LoginFailureRetention   string                 `protobuf:"bytes,4,opt,name=login_failure_retention,json=loginFailureRetention,proto3" json:"login_failure_retention,omitempty"`
+	FileMode                string                 `protobuf:"bytes,5,opt,name=file_mode,json=fileMode,proto3" json:"file_mode,omitempty"`
+	DirMode                 string                 `protobuf:"bytes,6,opt,name=dir_mode,json=dirMode,proto3" json:"dir_mode,omitempty"`
+	unknownFields           protoimpl.UnknownFields
+	sizeCache               protoimpl.SizeCache
+}
+
+func (x *Logging_Audit) Reset() {
+	*x = Logging_Audit{}
+	mi := &file_conf_conf_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Logging_Audit) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Logging_Audit) ProtoMessage() {}
+
+func (x *Logging_Audit) ProtoReflect() protoreflect.Message {
+	mi := &file_conf_conf_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Logging_Audit.ProtoReflect.Descriptor instead.
+func (*Logging_Audit) Descriptor() ([]byte, []int) {
+	return file_conf_conf_proto_rawDescGZIP(), []int{8, 0}
+}
+
+func (x *Logging_Audit) GetLoginFailureDir() string {
+	if x != nil {
+		return x.LoginFailureDir
+	}
+	return ""
+}
+
+func (x *Logging_Audit) GetLoginFailureFilePattern() string {
+	if x != nil {
+		return x.LoginFailureFilePattern
+	}
+	return ""
+}
+
+func (x *Logging_Audit) GetLoginFailureRotate() string {
+	if x != nil {
+		return x.LoginFailureRotate
+	}
+	return ""
+}
+
+func (x *Logging_Audit) GetLoginFailureRetention() string {
+	if x != nil {
+		return x.LoginFailureRetention
+	}
+	return ""
+}
+
+func (x *Logging_Audit) GetFileMode() string {
+	if x != nil {
+		return x.FileMode
+	}
+	return ""
+}
+
+func (x *Logging_Audit) GetDirMode() string {
+	if x != nil {
+		return x.DirMode
+	}
+	return ""
+}
+
 var File_conf_conf_proto protoreflect.FileDescriptor
 
 const file_conf_conf_proto_rawDesc = "" +
 	"\n" +
 	"\x0fconf/conf.proto\x12\n" +
-	"kratos.api\x1a\x1egoogle/protobuf/duration.proto\"]\n" +
+	"kratos.api\x1a\x1egoogle/protobuf/duration.proto\"\x8b\x03\n" +
 	"\tBootstrap\x12*\n" +
 	"\x06server\x18\x01 \x01(\v2\x12.kratos.api.ServerR\x06server\x12$\n" +
-	"\x04data\x18\x02 \x01(\v2\x10.kratos.api.DataR\x04data\"\xb8\x02\n" +
+	"\x04data\x18\x02 \x01(\v2\x10.kratos.api.DataR\x04data\x123\n" +
+	"\ttemplates\x18\x03 \x01(\v2\x15.kratos.api.TemplatesR\ttemplates\x12-\n" +
+	"\asession\x18\x04 \x01(\v2\x13.kratos.api.SessionR\asession\x12&\n" +
+	"\x05users\x18\x05 \x03(\v2\x10.kratos.api.UserR\x05users\x12?\n" +
+	"\rauthorization\x18\x06 \x01(\v2\x19.kratos.api.AuthorizationR\rauthorization\x120\n" +
+	"\bsecurity\x18\a \x01(\v2\x14.kratos.api.SecurityR\bsecurity\x12-\n" +
+	"\alogging\x18\b \x01(\v2\x13.kratos.api.LoggingR\alogging\"\xb8\x02\n" +
 	"\x06Server\x12+\n" +
 	"\x04http\x18\x01 \x01(\v2\x17.kratos.api.Server.HTTPR\x04http\x12+\n" +
 	"\x04grpc\x18\x02 \x01(\v2\x17.kratos.api.Server.GRPCR\x04grpc\x1ai\n" +
@@ -437,18 +1207,82 @@ const file_conf_conf_proto_rawDesc = "" +
 	"\x04GRPC\x12\x18\n" +
 	"\anetwork\x18\x01 \x01(\tR\anetwork\x12\x12\n" +
 	"\x04addr\x18\x02 \x01(\tR\x04addr\x123\n" +
-	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\xdd\x02\n" +
+	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\xc4\x03\n" +
 	"\x04Data\x125\n" +
 	"\bdatabase\x18\x01 \x01(\v2\x19.kratos.api.Data.DatabaseR\bdatabase\x12,\n" +
 	"\x05redis\x18\x02 \x01(\v2\x16.kratos.api.Data.RedisR\x05redis\x1a:\n" +
 	"\bDatabase\x12\x16\n" +
 	"\x06driver\x18\x01 \x01(\tR\x06driver\x12\x16\n" +
-	"\x06source\x18\x02 \x01(\tR\x06source\x1a\xb3\x01\n" +
+	"\x06source\x18\x02 \x01(\tR\x06source\x1a\x9a\x02\n" +
 	"\x05Redis\x12\x18\n" +
 	"\anetwork\x18\x01 \x01(\tR\anetwork\x12\x12\n" +
 	"\x04addr\x18\x02 \x01(\tR\x04addr\x12<\n" +
 	"\fread_timeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\vreadTimeout\x12>\n" +
-	"\rwrite_timeout\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\fwriteTimeoutB Z\x1esimple_auth/internal/conf;confb\x06proto3"
+	"\rwrite_timeout\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\fwriteTimeout\x12\x1a\n" +
+	"\busername\x18\x05 \x01(\tR\busername\x12\x1a\n" +
+	"\bpassword\x18\x06 \x01(\tR\bpassword\x12\x0e\n" +
+	"\x02db\x18\a \x01(\x05R\x02db\x12\x1d\n" +
+	"\n" +
+	"key_prefix\x18\b \x01(\tR\tkeyPrefix\"*\n" +
+	"\tTemplates\x12\x1d\n" +
+	"\n" +
+	"login_page\x18\x01 \x01(\tR\tloginPage\"\xf2\x02\n" +
+	"\aSession\x12\x1f\n" +
+	"\vcookie_name\x18\x01 \x01(\tR\n" +
+	"cookieName\x12#\n" +
+	"\rcookie_domain\x18\x02 \x01(\tR\fcookieDomain\x12<\n" +
+	"\fidle_timeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\vidleTimeout\x12D\n" +
+	"\x10absolute_timeout\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\x0fabsoluteTimeout\x12-\n" +
+	"\x12sliding_expiration\x18\x05 \x01(\bR\x11slidingExpiration\x12#\n" +
+	"\rsecure_cookie\x18\x06 \x01(\bR\fsecureCookie\x12\x1b\n" +
+	"\tsame_site\x18\a \x01(\tR\bsameSite\x12,\n" +
+	"\x12per_host_namespace\x18\b \x01(\bR\x10perHostNamespace\"\x92\x01\n" +
+	"\x04User\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1a\n" +
+	"\busername\x18\x02 \x01(\tR\busername\x12!\n" +
+	"\fdisplay_name\x18\x03 \x01(\tR\vdisplayName\x12#\n" +
+	"\rpassword_hash\x18\x04 \x01(\tR\fpasswordHash\x12\x16\n" +
+	"\x06groups\x18\x05 \x03(\tR\x06groups\"\xdf\x02\n" +
+	"\rAuthorization\x12\x18\n" +
+	"\aenabled\x18\x01 \x01(\bR\aenabled\x12\x12\n" +
+	"\x04mode\x18\x02 \x01(\tR\x04mode\x124\n" +
+	"\x05rules\x18\x03 \x03(\v2\x1e.kratos.api.Authorization.RuleR\x05rules\x1a\xe9\x01\n" +
+	"\x04Rule\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05hosts\x18\x02 \x03(\tR\x05hosts\x12\x1d\n" +
+	"\n" +
+	"path_match\x18\x03 \x01(\tR\tpathMatch\x12\x14\n" +
+	"\x05paths\x18\x04 \x03(\tR\x05paths\x12\x18\n" +
+	"\amethods\x18\x05 \x03(\tR\amethods\x12!\n" +
+	"\fallow_groups\x18\x06 \x03(\tR\vallowGroups\x12\x1f\n" +
+	"\vallow_users\x18\a \x03(\tR\n" +
+	"allowUsers\x12$\n" +
+	"\x0eallow_user_ids\x18\b \x03(\tR\fallowUserIds\"\xf2\x04\n" +
+	"\bSecurity\x12F\n" +
+	"\rlogin_failure\x18\x01 \x01(\v2!.kratos.api.Security.LoginFailureR\floginFailure\x120\n" +
+	"\x14allow_redirect_hosts\x18\x02 \x03(\tR\x12allowRedirectHosts\x1a\xeb\x03\n" +
+	"\fLoginFailure\x12!\n" +
+	"\fmax_attempts\x18\x01 \x01(\x05R\vmaxAttempts\x121\n" +
+	"\x06window\x18\x02 \x01(\v2\x19.google.protobuf.DurationR\x06window\x12<\n" +
+	"\fban_duration\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\vbanDuration\x12\x15\n" +
+	"\x06ban_ip\x18\x04 \x01(\bR\x05banIp\x12\x19\n" +
+	"\bban_user\x18\x05 \x01(\bR\abanUser\x124\n" +
+	"\x16user_whitelist_enabled\x18\x06 \x01(\bR\x14userWhitelistEnabled\x12%\n" +
+	"\x0euser_whitelist\x18\a \x03(\tR\ruserWhitelist\x12A\n" +
+	"\x1eban_ip_on_non_whitelisted_user\x18\b \x01(\bR\x19banIpOnNonWhitelistedUser\x124\n" +
+	"\x16password_attempt_audit\x18\t \x01(\tR\x14passwordAttemptAudit\x12?\n" +
+	"\x1cpassword_attempt_hmac_secret\x18\n" +
+	" \x01(\tR\x19passwordAttemptHmacSecret\"\xe5\x02\n" +
+	"\aLogging\x12\x14\n" +
+	"\x05level\x18\x01 \x01(\tR\x05level\x12/\n" +
+	"\x05audit\x18\x02 \x01(\v2\x19.kratos.api.Logging.AuditR\x05audit\x1a\x92\x02\n" +
+	"\x05Audit\x12*\n" +
+	"\x11login_failure_dir\x18\x01 \x01(\tR\x0floginFailureDir\x12;\n" +
+	"\x1alogin_failure_file_pattern\x18\x02 \x01(\tR\x17loginFailureFilePattern\x120\n" +
+	"\x14login_failure_rotate\x18\x03 \x01(\tR\x12loginFailureRotate\x126\n" +
+	"\x17login_failure_retention\x18\x04 \x01(\tR\x15loginFailureRetention\x12\x1b\n" +
+	"\tfile_mode\x18\x05 \x01(\tR\bfileMode\x12\x19\n" +
+	"\bdir_mode\x18\x06 \x01(\tR\adirModeB Z\x1esimple_auth/internal/conf;confb\x06proto3"
 
 var (
 	file_conf_conf_proto_rawDescOnce sync.Once
@@ -462,33 +1296,55 @@ func file_conf_conf_proto_rawDescGZIP() []byte {
 	return file_conf_conf_proto_rawDescData
 }
 
-var file_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
+var file_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
 var file_conf_conf_proto_goTypes = []any{
-	(*Bootstrap)(nil),           // 0: kratos.api.Bootstrap
-	(*Server)(nil),              // 1: kratos.api.Server
-	(*Data)(nil),                // 2: kratos.api.Data
-	(*Server_HTTP)(nil),         // 3: kratos.api.Server.HTTP
-	(*Server_GRPC)(nil),         // 4: kratos.api.Server.GRPC
-	(*Data_Database)(nil),       // 5: kratos.api.Data.Database
-	(*Data_Redis)(nil),          // 6: kratos.api.Data.Redis
-	(*durationpb.Duration)(nil), // 7: google.protobuf.Duration
+	(*Bootstrap)(nil),             // 0: kratos.api.Bootstrap
+	(*Server)(nil),                // 1: kratos.api.Server
+	(*Data)(nil),                  // 2: kratos.api.Data
+	(*Templates)(nil),             // 3: kratos.api.Templates
+	(*Session)(nil),               // 4: kratos.api.Session
+	(*User)(nil),                  // 5: kratos.api.User
+	(*Authorization)(nil),         // 6: kratos.api.Authorization
+	(*Security)(nil),              // 7: kratos.api.Security
+	(*Logging)(nil),               // 8: kratos.api.Logging
+	(*Server_HTTP)(nil),           // 9: kratos.api.Server.HTTP
+	(*Server_GRPC)(nil),           // 10: kratos.api.Server.GRPC
+	(*Data_Database)(nil),         // 11: kratos.api.Data.Database
+	(*Data_Redis)(nil),            // 12: kratos.api.Data.Redis
+	(*Authorization_Rule)(nil),    // 13: kratos.api.Authorization.Rule
+	(*Security_LoginFailure)(nil), // 14: kratos.api.Security.LoginFailure
+	(*Logging_Audit)(nil),         // 15: kratos.api.Logging.Audit
+	(*durationpb.Duration)(nil),   // 16: google.protobuf.Duration
 }
 var file_conf_conf_proto_depIdxs = []int32{
 	1,  // 0: kratos.api.Bootstrap.server:type_name -> kratos.api.Server
 	2,  // 1: kratos.api.Bootstrap.data:type_name -> kratos.api.Data
-	3,  // 2: kratos.api.Server.http:type_name -> kratos.api.Server.HTTP
-	4,  // 3: kratos.api.Server.grpc:type_name -> kratos.api.Server.GRPC
-	5,  // 4: kratos.api.Data.database:type_name -> kratos.api.Data.Database
-	6,  // 5: kratos.api.Data.redis:type_name -> kratos.api.Data.Redis
-	7,  // 6: kratos.api.Server.HTTP.timeout:type_name -> google.protobuf.Duration
-	7,  // 7: kratos.api.Server.GRPC.timeout:type_name -> google.protobuf.Duration
-	7,  // 8: kratos.api.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
-	7,  // 9: kratos.api.Data.Redis.write_timeout:type_name -> google.protobuf.Duration
-	10, // [10:10] is the sub-list for method output_type
-	10, // [10:10] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	3,  // 2: kratos.api.Bootstrap.templates:type_name -> kratos.api.Templates
+	4,  // 3: kratos.api.Bootstrap.session:type_name -> kratos.api.Session
+	5,  // 4: kratos.api.Bootstrap.users:type_name -> kratos.api.User
+	6,  // 5: kratos.api.Bootstrap.authorization:type_name -> kratos.api.Authorization
+	7,  // 6: kratos.api.Bootstrap.security:type_name -> kratos.api.Security
+	8,  // 7: kratos.api.Bootstrap.logging:type_name -> kratos.api.Logging
+	9,  // 8: kratos.api.Server.http:type_name -> kratos.api.Server.HTTP
+	10, // 9: kratos.api.Server.grpc:type_name -> kratos.api.Server.GRPC
+	11, // 10: kratos.api.Data.database:type_name -> kratos.api.Data.Database
+	12, // 11: kratos.api.Data.redis:type_name -> kratos.api.Data.Redis
+	16, // 12: kratos.api.Session.idle_timeout:type_name -> google.protobuf.Duration
+	16, // 13: kratos.api.Session.absolute_timeout:type_name -> google.protobuf.Duration
+	13, // 14: kratos.api.Authorization.rules:type_name -> kratos.api.Authorization.Rule
+	14, // 15: kratos.api.Security.login_failure:type_name -> kratos.api.Security.LoginFailure
+	15, // 16: kratos.api.Logging.audit:type_name -> kratos.api.Logging.Audit
+	16, // 17: kratos.api.Server.HTTP.timeout:type_name -> google.protobuf.Duration
+	16, // 18: kratos.api.Server.GRPC.timeout:type_name -> google.protobuf.Duration
+	16, // 19: kratos.api.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
+	16, // 20: kratos.api.Data.Redis.write_timeout:type_name -> google.protobuf.Duration
+	16, // 21: kratos.api.Security.LoginFailure.window:type_name -> google.protobuf.Duration
+	16, // 22: kratos.api.Security.LoginFailure.ban_duration:type_name -> google.protobuf.Duration
+	23, // [23:23] is the sub-list for method output_type
+	23, // [23:23] is the sub-list for method input_type
+	23, // [23:23] is the sub-list for extension type_name
+	23, // [23:23] is the sub-list for extension extendee
+	0,  // [0:23] is the sub-list for field type_name
 }
 
 func init() { file_conf_conf_proto_init() }
@@ -502,7 +1358,7 @@ func file_conf_conf_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_conf_conf_proto_rawDesc), len(file_conf_conf_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   16,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

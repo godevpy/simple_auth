@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>登录</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: "Avenir Next", "PingFang SC", sans-serif;
+      background: linear-gradient(135deg, #f6efe5 0%, #d8e4df 48%, #bccbd6 100%);
+      color: #1f2a2e;
+    }
+    main {
+      width: min(420px, calc(100vw - 32px));
+      padding: 36px;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 24px 70px rgba(45, 62, 70, 0.22);
+      backdrop-filter: blur(18px);
+    }
+    h1 {
+      margin: 0 0 10px;
+      font-size: 30px;
+      letter-spacing: -0.04em;
+    }
+    p {
+      margin: 0 0 28px;
+      color: #5a686d;
+    }
+    label {
+      display: block;
+      margin: 18px 0 8px;
+      font-weight: 700;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 13px 14px;
+      border: 1px solid #b9c5c3;
+      border-radius: 14px;
+      font: inherit;
+      background: #fff;
+    }
+    button {
+      width: 100%;
+      margin-top: 24px;
+      padding: 14px 18px;
+      border: 0;
+      border-radius: 16px;
+      background: #1f4d45;
+      color: #fff;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .error {
+      margin-bottom: 18px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: #fff0ed;
+      color: #9b2c1f;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>登录鉴权服务</h1>
+    <p>请输入账号密码继续访问受保护资源。</p>
+    {{if .Message}}<div class="error">{{.Message}}</div>{{end}}
+    <form method="post" action="/login">
+      <input type="hidden" name="redirect" value="{{.Redirect}}">
+      <label for="username">用户名</label>
+      <input id="username" name="username" autocomplete="username" required>
+      <label for="password">密码</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+      <button type="submit">登录</button>
+    </form>
+  </main>
+</body>
+</html>

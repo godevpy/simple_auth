@@ -86,8 +86,8 @@ doc/dev/plan
 - HTTP 监听地址沿用当前 Kratos 配置：`0.0.0.0:8000`。
 - Redis 一期只支持单机：`127.0.0.1:6379`。
 - session Cookie 名称：`auth_session`。
-- session 空闲超时：`30m`。
-- session 绝对最长有效期：`24h`。
+- session 空闲超时：语义为 `30m`，YAML 使用 protobuf duration 写法 `1800s`。
+- session 绝对最长有效期：语义为 `24h`，YAML 使用 protobuf duration 写法 `86400s`。
 - session 滑动过期：开启。
 - Cookie `Domain`：不设置。
 - Cookie `Secure`：配置化，生产为 `true`。

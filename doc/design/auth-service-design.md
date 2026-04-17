@@ -627,8 +627,8 @@ redis:
 session:
   cookie_name: "auth_session"
   cookie_domain: ""
-  idle_timeout: "30m"
-  absolute_timeout: "24h"
+  idle_timeout: "1800s"
+  absolute_timeout: "86400s"
   sliding_expiration: true
   secure_cookie: true
   same_site: "Lax"
@@ -662,8 +662,8 @@ authorization:
 security:
   login_failure:
     max_attempts: 3
-    window: "30m"
-    ban_duration: "30m"
+    window: "1800s"
+    ban_duration: "1800s"
     ban_ip: true
     ban_user: true
     user_whitelist_enabled: true
@@ -687,6 +687,7 @@ logging:
 配置说明：
 
 - `templates.login_page` 指向服务端 HTML 登录页模板。
+- Kratos protobuf Duration 配置使用 `1800s`、`86400s` 这类 protobuf duration 写法；语义上分别对应 30 分钟和 24 小时。
 - `session.cookie_domain` 为空表示不设置 Cookie `Domain`，让 Cookie 按当前域名独立保存。
 - `session.per_host_namespace` 为 `true` 时，Redis session key 会包含访问域名命名空间。
 - `authorization.mode=whitelist` 表示只放行命中允许规则的请求，未命中时返回 `403`。

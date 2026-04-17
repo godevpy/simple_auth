@@ -2,14 +2,86 @@ server:
   http:
     addr: 0.0.0.0:8000
     timeout: 1s
-  grpc:
-    addr: 0.0.0.0:9000
-    timeout: 1s
 data:
-  database:
-    driver: mysql
-    source: root:root@tcp(127.0.0.1:3306)/test?parseTime=True&loc=Local
   redis:
     addr: 127.0.0.1:6379
     read_timeout: 0.2s
     write_timeout: 0.2s
+    key_prefix: auth
+
+templates:
+  login_page: templates/login.html
+
+session:
+  cookie_name: auth_session
+  cookie_domain: ""
+  idle_timeout: 1800s
+  absolute_timeout: 86400s
+  sliding_expiration: true
+  secure_cookie: true
+  same_site: Lax
+  per_host_namespace: true
+
+users:
+  - id: user-001
+    username: alice
+    display_name: Alice
+    # bcrypt hash for "password"; replace in production.
+    password_hash: "$2a$10$J8S4FZp2F6QrHTULpLM82OaZxjODc2IX6ywbT/Glbb5pu.W9O9YV."
+    groups:
+      - admin
+      - dev
+
+authorization:
+  enabled: true
+  mode: whitelist
+  rules:
+    - name: admin-only
+      hosts:
+        - admin.example.com
+      path_match: prefix
+      paths:
+        - /admin/
+      methods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+      allow_groups:
+        - admin
+    - name: ops-wildcard
+      hosts:
+        - app.example.com
+      path_match: wildcard
+      paths:
+        - "~ ^/ops/[^/]+/dashboard$"
+        - "~ ^/ops/reports/.*\\.html$"
+      methods:
+        - GET
+      allow_users:
+        - alice
+
+security:
+  login_failure:
+    max_attempts: 3
+    window: 1800s
+    ban_duration: 1800s
+    ban_ip: true
+    ban_user: true
+    user_whitelist_enabled: true
+    user_whitelist:
+      - alice
+    ban_ip_on_non_whitelisted_user: true
+    password_attempt_audit: hmac
+    password_attempt_hmac_secret: change-me-in-production
+  allow_redirect_hosts: []
+
+logging:
+  level: info
+  audit:
+    login_failure_dir: logs
+    login_failure_file_pattern: login_failure_audit-2006-01-02.jsonl
+    login_failure_rotate: daily
+    login_failure_retention: forever
+    file_mode: "0600"
+    dir_mode: "0700"
