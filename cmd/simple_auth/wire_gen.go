@@ -7,13 +7,13 @@
 package main
 
 import (
+	"github.com/go-kratos/kratos/v2"
+	"github.com/go-kratos/kratos/v2/log"
 	"simple_auth/internal/biz"
 	"simple_auth/internal/conf"
 	"simple_auth/internal/data"
 	"simple_auth/internal/server"
 	"simple_auth/internal/service"
-	"github.com/go-kratos/kratos/v2"
-	"github.com/go-kratos/kratos/v2/log"
 )
 
 import (
