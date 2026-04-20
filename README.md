@@ -61,3 +61,14 @@ go run ./cmd/simple_auth -conf ./configs
 go test ./...
 go build ./...
 ```
+
+## 发布
+
+推送任意 Git tag 会触发 GitHub Actions 自动发布 Release：
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+Release 会包含 Linux、macOS、Windows 的 amd64 和 arm64 二进制包，以及 `SHA256SUMS` 校验文件。
