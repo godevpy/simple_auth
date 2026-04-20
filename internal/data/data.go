@@ -56,6 +56,7 @@ func NewData(c *conf.Bootstrap) (*Data, func(), error) {
 		opts.WriteTimeout = redisConf.GetWriteTimeout().AsDuration()
 	}
 	rdb := redis.NewClient(opts)
+	log.Infof("redis client initialized: network=%s addr=%s db=%d key_prefix=%s", network, addr, redisConf.GetDb(), keyPrefix)
 	cleanup := func() {
 		log.Info("closing the data resources")
 		_ = rdb.Close()

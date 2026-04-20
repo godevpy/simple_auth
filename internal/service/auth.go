@@ -44,12 +44,15 @@ func NewAuthService(auth *biz.AuthUsecase, ready biz.ReadinessRepo, c *conf.Boot
 	if err != nil {
 		return nil, err
 	}
+	cfg := buildServiceConfig(c)
+	helper := log.NewHelper(logger)
+	helper.Infof("auth service initialized: login_template=%s cookie_name=%s secure_cookie=%t same_site=%s", loginPage, cfg.CookieName, cfg.SecureCookie, c.GetSession().GetSameSite())
 	return &AuthService{
 		auth:     auth,
 		ready:    ready,
 		template: tmpl,
-		cfg:      buildServiceConfig(c),
-		log:      log.NewHelper(logger),
+		cfg:      cfg,
+		log:      helper,
 	}, nil
 }
 
@@ -78,24 +81,29 @@ func buildServiceConfig(c *conf.Bootstrap) serviceConfig {
 
 func (s *AuthService) LoginPage(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
+		s.log.Warnf("login page method not allowed: method=%s ip=%s", r.Method, clientIP(r))
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
+	s.log.Debugf("login page rendered: ip=%s redirect=%s", clientIP(r), sanitizeRedirect(r.URL.Query().Get("redirect")))
 	s.renderLogin(w, http.StatusOK, sanitizeRedirect(r.URL.Query().Get("redirect")), "")
 }
 
 func (s *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
+		s.log.Warnf("login method not allowed: method=%s ip=%s", r.Method, clientIP(r))
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 	if err := r.ParseForm(); err != nil {
+		s.log.Warnf("login bad request: ip=%s error=%v", clientIP(r), err)
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
 	redirect := sanitizeRedirect(r.FormValue("redirect"))
+	username := strings.TrimSpace(r.FormValue("username"))
 	result, err := s.auth.Login(r.Context(), biz.LoginInput{
-		Username:  r.FormValue("username"),
+		Username:  username,
 		Password:  r.FormValue("password"),
 		Host:      originalHost(r),
 		ClientIP:  clientIP(r),
@@ -103,6 +111,7 @@ func (s *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		if errors.Is(err, biz.ErrInvalidCredentials) {
+			s.log.Warnf("login response: status=401 username=%s ip=%s host=%s", username, clientIP(r), originalHost(r))
 			s.renderLogin(w, http.StatusUnauthorized, redirect, "用户名或密码错误")
 			return
 		}
@@ -111,16 +120,19 @@ func (s *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.SetCookie(w, s.sessionCookie(result.SessionID, int(time.Until(result.Session.ExpiresAt).Seconds())))
+	s.log.Infof("login response: status=302 username=%s user_id=%s ip=%s redirect=%s", result.Session.Username, result.Session.UserID, clientIP(r), redirect)
 	http.Redirect(w, r, redirect, http.StatusFound)
 }
 
 func (s *AuthService) Verify(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
+		s.log.Warnf("verify method not allowed: method=%s ip=%s", r.Method, clientIP(r))
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 	cookie, err := r.Cookie(s.cfg.CookieName)
 	if err != nil || cookie.Value == "" {
+		s.log.Debugf("verify response: status=401 reason=missing_cookie host=%s uri=%s method=%s ip=%s", originalHost(r), originalURI(r), originalMethod(r), clientIP(r))
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
@@ -135,8 +147,10 @@ func (s *AuthService) Verify(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, biz.ErrUnauthorized):
+			s.log.Debugf("verify response: status=401 host=%s uri=%s method=%s ip=%s", originalHost(r), originalURI(r), originalMethod(r), clientIP(r))
 			w.WriteHeader(http.StatusUnauthorized)
 		case errors.Is(err, biz.ErrForbidden):
+			s.log.Warnf("verify response: status=403 host=%s uri=%s method=%s ip=%s", originalHost(r), originalURI(r), originalMethod(r), clientIP(r))
 			w.WriteHeader(http.StatusForbidden)
 		default:
 			s.log.Errorf("verify failed: %v", err)
@@ -147,11 +161,13 @@ func (s *AuthService) Verify(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Auth-User", session.Username)
 	w.Header().Set("X-Auth-User-ID", session.UserID)
 	w.Header().Set("X-Auth-Groups", strings.Join(session.Groups, ","))
+	s.log.Debugf("verify response: status=204 username=%s user_id=%s host=%s uri=%s method=%s", session.Username, session.UserID, originalHost(r), originalURI(r), originalMethod(r))
 	w.WriteHeader(http.StatusNoContent)
 }
 
 func (s *AuthService) Logout(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
+		s.log.Warnf("logout method not allowed: method=%s ip=%s", r.Method, clientIP(r))
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
@@ -163,24 +179,29 @@ func (s *AuthService) Logout(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	http.SetCookie(w, s.clearCookie())
+	s.log.Infof("logout response: status=302 host=%s ip=%s", originalHost(r), clientIP(r))
 	http.Redirect(w, r, "/login", http.StatusFound)
 }
 
 func (s *AuthService) Me(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
+		s.log.Warnf("me method not allowed: method=%s ip=%s", r.Method, clientIP(r))
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 	cookie, err := r.Cookie(s.cfg.CookieName)
 	if err != nil || cookie.Value == "" {
+		s.log.Debugf("me response: status=401 reason=missing_cookie host=%s ip=%s", originalHost(r), clientIP(r))
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	session, err := s.auth.Me(r.Context(), originalHost(r), cookie.Value)
 	if err != nil {
+		s.log.Debugf("me response: status=401 host=%s ip=%s error=%v", originalHost(r), clientIP(r), err)
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+	s.log.Debugf("me response: status=200 username=%s user_id=%s host=%s", session.Username, session.UserID, originalHost(r))
 	writeJSON(w, http.StatusOK, map[string]any{
 		"user_id":      session.UserID,
 		"username":     session.Username,
@@ -199,9 +220,11 @@ func (s *AuthService) Readyz(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 	defer cancel()
 	if err := s.ready.Ping(ctx); err != nil {
+		s.log.Errorf("readyz failed: redis unavailable: %v", err)
 		http.Error(w, "redis unavailable", http.StatusServiceUnavailable)
 		return
 	}
+	s.log.Debug("readyz ok")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte("ok"))
 }

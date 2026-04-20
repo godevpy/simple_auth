@@ -36,10 +36,10 @@ func NewHTTPServer(c *conf.Bootstrap, auth *service.AuthService, logger log.Logg
 		}
 		auth.LoginPage(w, r)
 	})
-	srv.HandleFunc("/auth/verify", auth.Verify)
-	srv.HandleFunc("/logout", auth.Logout)
-	srv.HandleFunc("/me", auth.Me)
-	srv.HandleFunc("/healthz", auth.Healthz)
-	srv.HandleFunc("/readyz", auth.Readyz)
+	srv.HandleFunc("/_auth/verify", auth.Verify)
+	srv.HandleFunc("/_auth/logout", auth.Logout)
+	srv.HandleFunc("/_auth/me", auth.Me)
+	srv.HandleFunc("/_auth/healthz", auth.Healthz)
+	srv.HandleFunc("/_auth/readyz", auth.Readyz)
 	return srv
 }

@@ -29,7 +29,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&flagconf, "conf", "../../configs", "config path, eg: -conf config.yaml")
+	flag.StringVar(&flagconf, "conf", "./configs", "config path, eg: -conf config.yaml")
 }
 
 func newApp(logger log.Logger, hs *http.Server) *kratos.App {
@@ -71,6 +71,14 @@ func main() {
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
 	}
+	log.Infof("config loaded: path=%s http_addr=%s redis_addr=%s users=%d authorization_enabled=%t audit_dir=%s",
+		flagconf,
+		bc.GetServer().GetHttp().GetAddr(),
+		bc.GetData().GetRedis().GetAddr(),
+		len(bc.GetUsers()),
+		bc.GetAuthorization().GetEnabled(),
+		bc.GetLogging().GetAudit().GetLoginFailureDir(),
+	)
 
 	app, cleanup, err := wireApp(&bc, logger)
 	if err != nil {

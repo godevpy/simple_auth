@@ -228,12 +228,14 @@ func (uc *AuthUsecase) Login(ctx context.Context, in LoginInput) (*LoginResult, 
 		return nil, err
 	} else if banned {
 		_ = uc.auditFailure(ctx, in, "ip_banned", "none")
+		uc.log.Warnf("login rejected: reason=ip_banned username=%s ip=%s host=%s", username, clientIP, NormalizeHost(in.Host))
 		return nil, ErrInvalidCredentials
 	}
 	if banned, err := uc.failures.IsUserBanned(ctx, username); err != nil {
 		return nil, err
 	} else if banned {
 		_ = uc.auditFailure(ctx, in, "user_banned", "none")
+		uc.log.Warnf("login rejected: reason=user_banned username=%s ip=%s host=%s", username, clientIP, NormalizeHost(in.Host))
 		return nil, ErrInvalidCredentials
 	}
 
@@ -246,6 +248,7 @@ func (uc *AuthUsecase) Login(ctx context.Context, in LoginInput) (*LoginResult, 
 			banResult = "ip_banned"
 		}
 		_ = uc.auditFailure(ctx, in, "non_whitelisted_user", banResult)
+		uc.log.Warnf("login rejected: reason=non_whitelisted_user username=%s ip=%s host=%s ban_result=%s", username, clientIP, NormalizeHost(in.Host), banResult)
 		return nil, ErrInvalidCredentials
 	}
 
@@ -288,16 +291,19 @@ func (uc *AuthUsecase) Login(ctx context.Context, in LoginInput) (*LoginResult, 
 	if err := uc.sessions.Save(ctx, sessionID, session, uc.sessionTTL(now, session.ExpiresAt)); err != nil {
 		return nil, err
 	}
+	uc.log.Infof("login succeeded: username=%s user_id=%s ip=%s host=%s expires_at=%s", user.Username, user.ID, clientIP, session.Host, session.ExpiresAt.Format(time.RFC3339))
 	return &LoginResult{SessionID: sessionID, Session: session}, nil
 }
 
 func (uc *AuthUsecase) Verify(ctx context.Context, in VerifyInput) (*Session, error) {
 	if strings.TrimSpace(in.SessionID) == "" {
+		uc.log.Debugf("verify rejected: reason=missing_session host=%s uri=%s method=%s ip=%s", NormalizeHost(in.Host), in.URI, in.Method, in.ClientIP)
 		return nil, ErrUnauthorized
 	}
 	session, err := uc.sessions.Find(ctx, in.Host, in.SessionID)
 	if err != nil {
 		if errors.Is(err, ErrSessionNotFound) {
+			uc.log.Debugf("verify rejected: reason=session_not_found host=%s uri=%s method=%s ip=%s", NormalizeHost(in.Host), in.URI, in.Method, in.ClientIP)
 			return nil, ErrUnauthorized
 		}
 		return nil, err
@@ -305,6 +311,7 @@ func (uc *AuthUsecase) Verify(ctx context.Context, in VerifyInput) (*Session, er
 	now := uc.now().UTC()
 	if !session.ExpiresAt.After(now) {
 		_ = uc.sessions.Delete(ctx, in.Host, in.SessionID)
+		uc.log.Infof("verify rejected: reason=session_expired username=%s user_id=%s host=%s uri=%s method=%s", session.Username, session.UserID, NormalizeHost(in.Host), in.URI, in.Method)
 		return nil, ErrUnauthorized
 	}
 	if !uc.authorizer.Allow(AuthorizationInput{
@@ -313,6 +320,7 @@ func (uc *AuthUsecase) Verify(ctx context.Context, in VerifyInput) (*Session, er
 		Method: in.Method,
 		User:   session.User(),
 	}) {
+		uc.log.Warnf("verify rejected: reason=forbidden username=%s user_id=%s host=%s uri=%s method=%s ip=%s", session.Username, session.UserID, NormalizeHost(in.Host), in.URI, in.Method, in.ClientIP)
 		return nil, ErrForbidden
 	}
 	if uc.cfg.SlidingExpiration {
@@ -321,14 +329,20 @@ func (uc *AuthUsecase) Verify(ctx context.Context, in VerifyInput) (*Session, er
 			return nil, err
 		}
 	}
+	uc.log.Debugf("verify allowed: username=%s user_id=%s host=%s uri=%s method=%s", session.Username, session.UserID, NormalizeHost(in.Host), in.URI, in.Method)
 	return session, nil
 }
 
 func (uc *AuthUsecase) Logout(ctx context.Context, host, sessionID string) error {
 	if strings.TrimSpace(sessionID) == "" {
+		uc.log.Debugf("logout ignored: reason=missing_session host=%s", NormalizeHost(host))
 		return nil
 	}
-	return uc.sessions.Delete(ctx, host, sessionID)
+	if err := uc.sessions.Delete(ctx, host, sessionID); err != nil {
+		return err
+	}
+	uc.log.Infof("logout completed: host=%s", NormalizeHost(host))
+	return nil
 }
 
 func (uc *AuthUsecase) Me(ctx context.Context, host, sessionID string) (*Session, error) {
@@ -371,6 +385,7 @@ func (uc *AuthUsecase) recordCredentialFailure(ctx context.Context, in LoginInpu
 		}
 		banResult = appendBanResult(banResult, "user_banned")
 	}
+	uc.log.Warnf("login failed: reason=%s username=%s ip=%s host=%s ip_failures=%d user_failures=%d ban_result=%s", reason, strings.TrimSpace(in.Username), strings.TrimSpace(in.ClientIP), NormalizeHost(in.Host), ipCount, userCount, banResult)
 	return uc.auditFailure(ctx, in, reason, banResult)
 }
 

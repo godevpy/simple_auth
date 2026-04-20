@@ -26,8 +26,8 @@ users:
   - id: user-001
     username: alice
     display_name: Alice
-    # bcrypt hash for "password"; replace in production.
-    password_hash: "$2a$10$J8S4FZp2F6QrHTULpLM82OaZxjODc2IX6ywbT/Glbb5pu.W9O9YV."
+    # bcrypt hash for "abcd1235"; replace in production.
+    password_hash: "$2a$10$rHkU0qr/42BavCYrWad4SO7WBbXmSOnpmJQ3apVnte5EKHARivoka"
     groups:
       - admin
       - dev
@@ -38,7 +38,7 @@ authorization:
   rules:
     - name: admin-only
       hosts:
-        - admin.example.com
+#        - admin.example.com
       path_match: prefix
       paths:
         - /admin/
@@ -63,11 +63,11 @@ authorization:
 
 security:
   login_failure:
-    max_attempts: 3
+    max_attempts: 300
     window: 1800s
     ban_duration: 1800s
-    ban_ip: true
-    ban_user: true
+    ban_ip: false
+    ban_user: false
     user_whitelist_enabled: true
     user_whitelist:
       - alice
