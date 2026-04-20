@@ -49,8 +49,8 @@
 
 约定：
 
-- `/auth/verify` 未登录时返回 `401 Unauthorized`。
-- `/auth/verify` 已登录但无权限时返回 `403 Forbidden`。
+- `/_auth/verify` 未登录时返回 `401 Unauthorized`。
+- `/_auth/verify` 已登录但无权限时返回 `403 Forbidden`。
 - Nginx 使用 `error_page 401 =302 /login?redirect=$request_uri` 将未登录请求跳转到登录页。
 - 登录接口和登出接口可以直接返回 `302`。
 
@@ -204,7 +204,7 @@ Location: <redirect>
 ### 6.3 Nginx 鉴权校验
 
 ```http
-GET /auth/verify
+GET /_auth/verify
 Cookie: auth_session=<session-id>
 X-Original-Host: app.example.com
 X-Original-URI: /admin/page?x=1
@@ -248,7 +248,7 @@ X-Auth-Groups: admin,dev
 ### 6.4 当前用户信息
 
 ```http
-GET /me
+GET /_auth/me
 Cookie: auth_session=<session-id>
 ```
 
@@ -272,7 +272,7 @@ Cookie: auth_session=<session-id>
 ### 6.5 登出
 
 ```http
-POST /logout
+POST /_auth/logout
 Cookie: auth_session=<session-id>
 ```
 
@@ -362,11 +362,12 @@ Max-Age: 与 session TTL 对齐
 
 关键约定：
 
-- `/auth/verify` 是 `auth_request` 子请求接口。
+- `/_auth/verify` 是 `auth_request` 子请求接口。
 - 未登录返回 `401`。
 - 无权限返回 `403`。
 - 登录页跳转由 Nginx 将 `401` 转换为 `302` 完成。
 - 路径授权所需原始请求信息通过 `X-Original-URI`、`X-Original-Method`、`X-Original-Host` 传给鉴权服务。
+- `/login`、`/_auth/logout`、`/_auth/verify` 需要透传同一个原始业务域名，避免按域名隔离 session 时登录和鉴权命名空间不一致。
 
 示例配置：
 
@@ -382,6 +383,9 @@ location /private/ {
     proxy_set_header X-Auth-User $auth_user;
     proxy_set_header X-Auth-User-ID $auth_user_id;
     proxy_set_header X-Auth-Groups $auth_groups;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
 
     error_page 401 =302 /login?redirect=$request_uri;
     error_page 403 = /403.html;
@@ -391,9 +395,10 @@ location /private/ {
 
 location = /_auth/verify {
     internal;
-    proxy_pass http://auth-service/auth/verify;
+    proxy_pass http://auth-service/_auth/verify;
     proxy_pass_request_body off;
     proxy_set_header Content-Length "";
+    proxy_set_header Host $host;
     proxy_set_header X-Original-URI $request_uri;
     proxy_set_header X-Original-Method $request_method;
     proxy_set_header X-Original-Host $host;
@@ -405,12 +410,20 @@ location = /_auth/verify {
 
 location /login {
     proxy_pass http://auth-service;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
 }
 
-location /logout {
+location /_auth/logout {
     proxy_pass http://auth-service;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
 }
 ```
+
+更完整的接入说明见 `doc/integration/nginx-auth-request.md`。
 
 ## 10. 用户凭据来源
 
@@ -435,11 +448,11 @@ location /logout {
 
 ## 11. 访问路径限制设计
 
-鉴权服务支持对访问路径做限制，该能力在 `/auth/verify` 中完成，后端业务服务无需感知。
+鉴权服务支持对访问路径做限制，该能力在 `/_auth/verify` 中完成，后端业务服务无需感知。
 
 ### 11.1 授权判断输入
 
-Nginx 调用 `/auth/verify` 时传递：
+Nginx 调用 `/_auth/verify` 时传递：
 
 - `Host` 或 `X-Original-Host`：当前访问域名。
 - `X-Original-URI`：原始请求 URI，包含 path 和 query。
@@ -756,7 +769,7 @@ logging:
 - `internal/conf`：配置结构定义，遵循 Kratos 使用 proto 定义配置结构的方式。
 - `internal/biz`：认证、session、路径授权、登录失败封禁等核心业务规则。
 - `internal/data`：Redis session、Redis 封禁计数、YAML 用户加载、按天文件审计日志等数据访问实现。
-- `internal/service`：登录页、登录提交、登出、`/auth/verify` 等 HTTP handler 的编排层。
+- `internal/service`：登录页、登录提交、登出、`/_auth/verify` 等 HTTP handler 的编排层。
 - `internal/server`：Kratos HTTP server 初始化和路由注册。
 - `templates`：服务端 HTML 模板。
 - `deploy/nginx`：Nginx `auth_request` 示例配置。
@@ -778,8 +791,8 @@ logging:
 - 登录失败审计日志按天切分，示例文件名为 `logs/login_failure_audit-2026-04-17.jsonl`。
 - 登录失败审计日志永久保存，服务不自动删除历史文件。
 - Prometheus 指标可后续实现。
-- 健康检查接口 `GET /healthz`。
-- 就绪检查接口 `GET /readyz`，用于检查 Redis 是否可用。
+- 健康检查接口 `GET /_auth/healthz`。
+- 就绪检查接口 `GET /_auth/readyz`，用于检查 Redis 是否可用。
 
 ## 17. 初版里程碑
 
@@ -795,9 +808,9 @@ logging:
 - 登录失败安全审计按天写入独立文件日志并永久保存。
 - Redis session 创建和校验。
 - session 可配置超时和滑动过期。
-- `/auth/verify` 对接 Nginx。
+- `/_auth/verify` 对接 Nginx。
 - 基于配置的轻量路径访问限制，采用白名单逻辑，支持前缀匹配和 Nginx 风格通配符匹配。
-- `/logout` 登出。
+- `/_auth/logout` 登出。
 - 基础 Nginx 配置示例。
 
 ### M2：安全增强
@@ -836,7 +849,7 @@ logging:
 
 第二轮确认：
 
-1. `/auth/verify` 未登录返回 `401`，由 Nginx 转 `302` 到登录页。
+1. `/_auth/verify` 未登录返回 `401`，由 Nginx 转 `302` 到登录页。
 2. 路径访问限制放入 M1。
 3. 授权规则采用白名单逻辑。
 4. 路径匹配 M1 支持前缀匹配和通配符匹配。

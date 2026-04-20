@@ -16,7 +16,7 @@
 一期目标：
 
 - 将 Kratos helloworld 骨架改造成 Nginx `auth_request` 鉴权服务。
-- 实现登录页、登录提交、登出、`/auth/verify`、健康检查和就绪检查。
+- 实现登录页、登录提交、登出、`/_auth/verify`、健康检查和就绪检查。
 - 使用 YAML 配置用户、session、Redis、路径授权、登录失败封禁和审计日志。
 - 使用 Redis 存储 session、登录失败计数和封禁状态。
 - 登录失败审计按天写入独立 JSON Lines 文件，永久保留。
@@ -173,22 +173,22 @@ auth:login:ban:user:<username-hash>
 ```text
 GET  /login
 POST /login
-GET  /auth/verify
-POST /logout
-GET  /me
-GET  /healthz
-GET  /readyz
+GET  /_auth/verify
+POST /_auth/logout
+GET  /_auth/me
+GET  /_auth/healthz
+GET  /_auth/readyz
 ```
 
 接口行为：
 
 - `GET /login`：渲染 `templates/login.html`。
 - `POST /login`：接收 form 表单，成功设置 Cookie 并 302 跳转，失败返回 401。
-- `GET /auth/verify`：校验 Cookie、Redis session 和路径白名单，成功返回 204，未登录返回 401，无权限返回 403。
-- `POST /logout`：删除 Redis session，清理 Cookie，302 到 `/login`。
-- `GET /me`：返回当前 session 用户信息，未登录返回 401。
-- `GET /healthz`：进程存活检查，直接 200。
-- `GET /readyz`：检查 Redis ping，成功 200，失败 503。
+- `GET /_auth/verify`：校验 Cookie、Redis session 和路径白名单，成功返回 204，未登录返回 401，无权限返回 403。
+- `POST /_auth/logout`：删除 Redis session，清理 Cookie，302 到 `/login`。
+- `GET /_auth/me`：返回当前 session 用户信息，未登录返回 401。
+- `GET /_auth/healthz`：进程存活检查，直接 200。
+- `GET /_auth/readyz`：检查 Redis ping，成功 200，失败 503。
 
 HTTP 实现决策：
 
@@ -251,7 +251,7 @@ deploy/nginx/auth_request.conf
 示例需要覆盖：
 
 - 受保护 location。
-- internal `/ _auth/verify` 或 `/_auth/verify` 子请求 location。
+- internal `/_auth/verify` 子请求 location。
 - `error_page 401 =302 /login?redirect=$request_uri`。
 - `error_page 403`。
 - `X-Original-URI`、`X-Original-Method`、`X-Original-Host` 透传。
@@ -310,12 +310,12 @@ deploy/nginx/auth_request.conf
 2. 添加 bcrypt 依赖，建议 `golang.org/x/crypto/bcrypt`。
 3. 在 `internal/data.NewData` 中初始化 Redis client。
 4. 在 cleanup 中关闭 Redis client。
-5. 实现 Redis ping 能力供 `/readyz` 使用。
+5. 实现 Redis ping 能力供 `/_auth/readyz` 使用。
 
 验收标准：
 
 - Redis client 可以根据 YAML 配置初始化。
-- Redis 不可用时 `/readyz` 能返回 503。
+- Redis 不可用时 `/_auth/readyz` 能返回 503。
 
 ### 第四步：实现用户配置仓储
 
@@ -387,7 +387,7 @@ deploy/nginx/auth_request.conf
 
 目标：
 
-- 实现 `/auth/verify` 所需路径授权。
+- 实现 `/_auth/verify` 所需路径授权。
 
 具体动作：
 
@@ -437,16 +437,16 @@ deploy/nginx/auth_request.conf
 1. 新增 `templates/login.html`。
 2. 实现 `GET /login`。
 3. 实现 `POST /login`。
-4. 实现 `GET /auth/verify`。
-5. 实现 `POST /logout`。
-6. 实现 `GET /me`。
-7. 实现 `GET /healthz`。
-8. 实现 `GET /readyz`。
+4. 实现 `GET /_auth/verify`。
+5. 实现 `POST /_auth/logout`。
+6. 实现 `GET /_auth/me`。
+7. 实现 `GET /_auth/healthz`。
+8. 实现 `GET /_auth/readyz`。
 9. 在 `internal/server/http.go` 注册以上路由。
 
 验收标准：
 
-- 未登录访问 `/auth/verify` 返回 401。
+- 未登录访问 `/_auth/verify` 返回 401。
 - 已登录且授权通过返回 204。
 - 已登录但未授权返回 403。
 - 登录页可渲染。

@@ -35,13 +35,13 @@ func TestAuthServiceVerifyStatuses(t *testing.T) {
 	}
 
 	missingCookie := httptest.NewRecorder()
-	svc.Verify(missingCookie, httptest.NewRequest(http.MethodGet, "/auth/verify", nil))
+	svc.Verify(missingCookie, httptest.NewRequest(http.MethodGet, "/_auth/verify", nil))
 	if missingCookie.Code != http.StatusUnauthorized {
 		t.Fatalf("missing cookie status = %d", missingCookie.Code)
 	}
 
 	allowed := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "/auth/verify", nil)
+	req := httptest.NewRequest(http.MethodGet, "/_auth/verify", nil)
 	req.AddCookie(&http.Cookie{Name: "auth_session", Value: sessionID})
 	req.Header.Set("X-Original-Host", "app.example.com")
 	req.Header.Set("X-Original-URI", "/admin/dashboard")
@@ -52,7 +52,7 @@ func TestAuthServiceVerifyStatuses(t *testing.T) {
 	}
 
 	forbidden := httptest.NewRecorder()
-	req = httptest.NewRequest(http.MethodGet, "/auth/verify", nil)
+	req = httptest.NewRequest(http.MethodGet, "/_auth/verify", nil)
 	req.AddCookie(&http.Cookie{Name: "auth_session", Value: sessionID})
 	req.Header.Set("X-Original-Host", "app.example.com")
 	req.Header.Set("X-Original-URI", "/unknown")
