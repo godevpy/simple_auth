@@ -562,6 +562,7 @@ type Logging struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Level         string                 `protobuf:"bytes,1,opt,name=level,proto3" json:"level,omitempty"`
 	Audit         *Logging_Audit         `protobuf:"bytes,2,opt,name=audit,proto3" json:"audit,omitempty"`
+	FilePath      string                 `protobuf:"bytes,3,opt,name=file_path,json=filePath,proto3" json:"file_path,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -608,6 +609,13 @@ func (x *Logging) GetAudit() *Logging_Audit {
 		return x.Audit
 	}
 	return nil
+}
+
+func (x *Logging) GetFilePath() string {
+	if x != nil {
+		return x.FilePath
+	}
+	return ""
 }
 
 type Server_HTTP struct {
@@ -1272,10 +1280,11 @@ const file_conf_conf_proto_rawDesc = "" +
 	"\x1eban_ip_on_non_whitelisted_user\x18\b \x01(\bR\x19banIpOnNonWhitelistedUser\x124\n" +
 	"\x16password_attempt_audit\x18\t \x01(\tR\x14passwordAttemptAudit\x12?\n" +
 	"\x1cpassword_attempt_hmac_secret\x18\n" +
-	" \x01(\tR\x19passwordAttemptHmacSecret\"\xe5\x02\n" +
+	" \x01(\tR\x19passwordAttemptHmacSecret\"\x82\x03\n" +
 	"\aLogging\x12\x14\n" +
 	"\x05level\x18\x01 \x01(\tR\x05level\x12/\n" +
-	"\x05audit\x18\x02 \x01(\v2\x19.kratos.api.Logging.AuditR\x05audit\x1a\x92\x02\n" +
+	"\x05audit\x18\x02 \x01(\v2\x19.kratos.api.Logging.AuditR\x05audit\x12\x1b\n" +
+	"\tfile_path\x18\x03 \x01(\tR\bfilePath\x1a\x92\x02\n" +
 	"\x05Audit\x12*\n" +
 	"\x11login_failure_dir\x18\x01 \x01(\tR\x0floginFailureDir\x12;\n" +
 	"\x1alogin_failure_file_pattern\x18\x02 \x01(\tR\x17loginFailureFilePattern\x120\n" +

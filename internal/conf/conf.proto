@@ -117,4 +117,5 @@ message Logging {
   }
   string level = 1;
   Audit audit = 2;
+  string file_path = 3;
 }

@@ -688,6 +688,8 @@ security:
 
 logging:
   level: "info"
+  # 为空表示输出到 stdout；也可设置为 "stderr" 或具体文件路径。
+  file_path: "logs/simple_auth.log"
   audit:
     login_failure_dir: "logs"
     login_failure_file_pattern: "login_failure_audit-2006-01-02.jsonl"
@@ -706,6 +708,7 @@ logging:
 - `authorization.mode=whitelist` 表示只放行命中允许规则的请求，未命中时返回 `403`。
 - `security.login_failure.password_attempt_audit` 不支持记录明文密码，建议只使用 `hmac` 或 `none`。
 - `security.login_failure.user_whitelist_enabled` 默认开启，白名单由 `user_whitelist` 显式配置。
+- `logging.file_path` 控制服务运行日志输出位置；为空或 `stdout` 输出到标准输出，`stderr` 输出到标准错误，其他值按文件路径追加写入。
 - `logging.audit.login_failure_file_pattern` 使用 Go 日期布局，按天生成独立登录失败审计日志文件。
 - `logging.audit.login_failure_rotate=daily` 表示服务只做按天切分，不做压缩和删除。
 - `logging.audit.login_failure_retention=forever` 表示服务不自动删除登录失败审计日志。

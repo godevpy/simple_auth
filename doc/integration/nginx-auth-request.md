@@ -164,6 +164,10 @@ session:
 authorization:
   enabled: true
   mode: whitelist
+
+logging:
+  # Empty means stdout. Set a file path to append service logs to that file.
+  file_path: ""
 ```
 
 注意：
@@ -174,6 +178,8 @@ authorization:
 - 本地 HTTP 联调时，如果依赖浏览器或 `requests.Session()` 自动带 Cookie，需要临时设置 `secure_cookie: false`，或者在测试脚本里显式传 `Cookie` 头。
 - 多域名共用同一个鉴权服务时，推荐保持 `cookie_domain: ""` 和 `per_host_namespace: true`，每个域名独立登录、独立登出、独立 session。
 - 如果前面还有 SLB、Ingress 或 CDN 终止 TLS，Nginx 到鉴权服务可以走内网 HTTP，但浏览器入口仍需要 HTTPS。
+- `logging.file_path` 为空或 `stdout` 时服务运行日志输出到标准输出；也可以设置为 `logs/simple_auth.log` 这类文件路径。
+- 登录失败审计日志和服务运行日志分开配置，审计日志目录由 `logging.audit.login_failure_dir` 控制。
 
 ## 7. 路径白名单
 

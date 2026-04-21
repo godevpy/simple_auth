@@ -44,6 +44,15 @@ go run ./cmd/simple_auth -conf ./configs
 
 当前示例用户为 `alice`，示例密码哈希仅用于本地开发，请在生产环境替换。
 
+服务运行日志默认输出到 stdout。如需写入指定文件，可以配置：
+
+```yaml
+logging:
+  file_path: logs/simple_auth.log
+```
+
+登录失败审计日志仍由 `logging.audit.login_failure_dir` 单独控制。
+
 ## Nginx
 
 完整接入文档见 `doc/integration/nginx-auth-request.md`，示例配置见 `deploy/nginx/auth_request.conf`。

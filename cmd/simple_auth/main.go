@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"simple_auth/internal/conf"
 
@@ -45,9 +47,30 @@ func newApp(logger log.Logger, hs *http.Server) *kratos.App {
 	)
 }
 
-func main() {
-	flag.Parse()
-	logger := log.With(log.NewStdLogger(os.Stdout),
+func newLogger(c *conf.Bootstrap) (log.Logger, func(), error) {
+	output := strings.TrimSpace(c.GetLogging().GetFilePath())
+	switch strings.ToLower(output) {
+	case "", "stdout":
+		return buildLogger(os.Stdout), func() {}, nil
+	case "stderr":
+		return buildLogger(os.Stderr), func() {}, nil
+	default:
+		dir := filepath.Dir(output)
+		if dir != "." && dir != "" {
+			if err := os.MkdirAll(dir, 0o755); err != nil {
+				return nil, nil, err
+			}
+		}
+		f, err := os.OpenFile(output, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+		if err != nil {
+			return nil, nil, err
+		}
+		return buildLogger(f), func() { _ = f.Close() }, nil
+	}
+}
+
+func buildLogger(output *os.File) log.Logger {
+	return log.With(log.NewStdLogger(output),
 		"ts", log.DefaultTimestamp,
 		"caller", log.DefaultCaller,
 		"service.id", id,
@@ -56,6 +79,10 @@ func main() {
 		"trace.id", tracing.TraceID(),
 		"span.id", tracing.SpanID(),
 	)
+}
+
+func main() {
+	flag.Parse()
 	c := config.New(
 		config.WithSource(
 			file.NewSource(flagconf),
@@ -71,13 +98,21 @@ func main() {
 	if err := c.Scan(&bc); err != nil {
 		panic(err)
 	}
-	log.Infof("config loaded: path=%s http_addr=%s redis_addr=%s users=%d authorization_enabled=%t audit_dir=%s",
+
+	logger, closeLogger, err := newLogger(&bc)
+	if err != nil {
+		panic(err)
+	}
+	defer closeLogger()
+	helper := log.NewHelper(logger)
+	helper.Infof("config loaded: path=%s http_addr=%s redis_addr=%s users=%d authorization_enabled=%t audit_dir=%s log_file=%s",
 		flagconf,
 		bc.GetServer().GetHttp().GetAddr(),
 		bc.GetData().GetRedis().GetAddr(),
 		len(bc.GetUsers()),
 		bc.GetAuthorization().GetEnabled(),
 		bc.GetLogging().GetAudit().GetLoginFailureDir(),
+		bc.GetLogging().GetFilePath(),
 	)
 
 	app, cleanup, err := wireApp(&bc, logger)
