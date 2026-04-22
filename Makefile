@@ -59,28 +59,7 @@ build:
 install:
 	mkdir -p bin/
 	go build -trimpath -ldflags "-X main.Name=simple_auth -X main.Version=$(VERSION)" -o ./bin/simple_auth ./cmd/simple_auth
-	install -d "$(DESTDIR)$(BINDIR)"
-	install -m 0755 ./bin/simple_auth "$(DESTDIR)$(BINDIR)/simple_auth"
-	install -d "$(DESTDIR)$(APP_DIR)"
-	install -d "$(DESTDIR)$(APP_DIR)/configs"
-	install -m 0644 configs/config.yaml "$(DESTDIR)$(APP_DIR)/configs/config.yaml.example"
-	@if [ ! -f "$(DESTDIR)$(APP_DIR)/configs/config.yaml" ]; then \
-		install -m 0644 configs/config.yaml "$(DESTDIR)$(APP_DIR)/configs/config.yaml"; \
-	else \
-		echo "Keep existing config: $(DESTDIR)$(APP_DIR)/configs/config.yaml"; \
-	fi
-	cp -R templates deploy doc "$(DESTDIR)$(APP_DIR)/"
-	install -d "$(DESTDIR)$(APP_DIR)/logs"
-	install -d "$(DESTDIR)$(SYSTEMD_DIR)"
-	sed -e "s|@BINDIR@|$(BINDIR)|g" -e "s|@APP_DIR@|$(APP_DIR)|g" deploy/systemd/simple_auth.service.in > ./bin/$(SERVICE_NAME)
-	install -m 0644 ./bin/$(SERVICE_NAME) "$(DESTDIR)$(SYSTEMD_DIR)/$(SERVICE_NAME)"
-	@if command -v systemctl >/dev/null 2>&1 && [ -z "$(DESTDIR)" ]; then \
-		systemctl daemon-reload; \
-	else \
-		echo "Installed files under DESTDIR=$(DESTDIR). Skip systemctl daemon-reload."; \
-	fi
-	$(MAKE) service-check
-	@echo "Installed $(SERVICE_NAME). Start it with: systemctl enable --now $(SERVICE_NAME)"
+	DESTDIR="$(DESTDIR)" PREFIX="$(PREFIX)" BINDIR="$(BINDIR)" APP_DIR="$(APP_DIR)" SYSTEMD_DIR="$(SYSTEMD_DIR)" SERVICE_NAME="$(SERVICE_NAME)" BIN_SRC="./bin/simple_auth" ./install.sh
 
 .PHONY: service-check
 # check installed binary, assets, and systemd service file

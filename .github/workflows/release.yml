@@ -63,7 +63,7 @@ jobs:
               -o "${package_dir}/${binary_name}" \
               ./cmd/simple_auth
 
-            cp README.md LICENSE "${package_dir}/"
+            cp README.md LICENSE install.sh "${package_dir}/"
             cp -R configs templates deploy doc "${package_dir}/"
 
             if [ "${goos}" = "windows" ]; then

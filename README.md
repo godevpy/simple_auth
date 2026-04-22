@@ -90,10 +90,17 @@ sudo systemctl status simple_auth.service
 
 `make install` 会自动执行 `make service-check`，检查二进制、配置、登录模板和 service 文件是否安装完整；如果本机存在 `systemd-analyze`，还会校验 service 文件。再次安装时不会覆盖已有 `config.yaml`，只会更新 `config.yaml.example`。
 
+Release 二进制包内也包含 `install.sh`，解压后可直接安装：
+
+```bash
+sudo ./install.sh
+```
+
 可以通过变量调整安装路径：
 
 ```bash
 sudo make install PREFIX=/usr/local APP_DIR=/opt/simple_auth SYSTEMD_DIR=/etc/systemd/system
+sudo PREFIX=/usr/local APP_DIR=/opt/simple_auth SYSTEMD_DIR=/etc/systemd/system ./install.sh
 ```
 
 ## 发布

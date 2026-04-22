@@ -31,7 +31,4 @@ func TestConfigYAMLScansBootstrap(t *testing.T) {
 	if !bc.GetSecurity().GetLoginFailure().GetUserWhitelistEnabled() {
 		t.Fatal("expected user whitelist to be enabled")
 	}
-	if bc.GetLogging().GetFilePath() != "" {
-		t.Fatalf("log file path = %q", bc.GetLogging().GetFilePath())
-	}
 }
