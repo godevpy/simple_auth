@@ -79,7 +79,7 @@ security:
 logging:
   level: info
   # Empty means stdout. Set a file path, for example logs/simple_auth.log, to write service logs to a file.
-  file_path: ""
+  file_path: "/var/log/simple_auth/simple_auth.log"
   audit:
     login_failure_dir: logs
     login_failure_file_pattern: login_failure_audit-2006-01-02.jsonl

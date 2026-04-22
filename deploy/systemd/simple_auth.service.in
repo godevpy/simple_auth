@@ -1,0 +1,14 @@
+[Unit]
+Description=Simple Auth Service
+Wants=network-online.target
+After=network-online.target redis.service
+
+[Service]
+Type=simple
+WorkingDirectory=@APP_DIR@
+ExecStart=@BINDIR@/simple_auth -conf @APP_DIR@/configs
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

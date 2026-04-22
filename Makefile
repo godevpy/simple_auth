@@ -1,6 +1,11 @@
 GOHOSTOS:=$(shell go env GOHOSTOS)
 GOPATH:=$(shell go env GOPATH)
 VERSION=$(shell git describe --tags --always)
+PREFIX?=/usr/local
+BINDIR?=$(PREFIX)/bin
+APP_DIR?=/opt/simple_auth
+SYSTEMD_DIR?=/etc/systemd/system
+SERVICE_NAME?=simple_auth.service
 
 ifeq ($(GOHOSTOS), windows)
 	#the `find.exe` is different from `find` in bash/shell.
@@ -48,6 +53,54 @@ api:
 # build
 build:
 	mkdir -p bin/ && go build -ldflags "-X main.Version=$(VERSION)" -o ./bin/ ./...
+
+.PHONY: install
+# install binary, assets, and systemd service
+install:
+	mkdir -p bin/
+	go build -trimpath -ldflags "-X main.Name=simple_auth -X main.Version=$(VERSION)" -o ./bin/simple_auth ./cmd/simple_auth
+	install -d "$(DESTDIR)$(BINDIR)"
+	install -m 0755 ./bin/simple_auth "$(DESTDIR)$(BINDIR)/simple_auth"
+	install -d "$(DESTDIR)$(APP_DIR)"
+	install -d "$(DESTDIR)$(APP_DIR)/configs"
+	install -m 0644 configs/config.yaml "$(DESTDIR)$(APP_DIR)/configs/config.yaml.example"
+	@if [ ! -f "$(DESTDIR)$(APP_DIR)/configs/config.yaml" ]; then \
+		install -m 0644 configs/config.yaml "$(DESTDIR)$(APP_DIR)/configs/config.yaml"; \
+	else \
+		echo "Keep existing config: $(DESTDIR)$(APP_DIR)/configs/config.yaml"; \
+	fi
+	cp -R templates deploy doc "$(DESTDIR)$(APP_DIR)/"
+	install -d "$(DESTDIR)$(APP_DIR)/logs"
+	install -d "$(DESTDIR)$(SYSTEMD_DIR)"
+	sed -e "s|@BINDIR@|$(BINDIR)|g" -e "s|@APP_DIR@|$(APP_DIR)|g" deploy/systemd/simple_auth.service.in > ./bin/$(SERVICE_NAME)
+	install -m 0644 ./bin/$(SERVICE_NAME) "$(DESTDIR)$(SYSTEMD_DIR)/$(SERVICE_NAME)"
+	@if command -v systemctl >/dev/null 2>&1 && [ -z "$(DESTDIR)" ]; then \
+		systemctl daemon-reload; \
+	else \
+		echo "Installed files under DESTDIR=$(DESTDIR). Skip systemctl daemon-reload."; \
+	fi
+	$(MAKE) service-check
+	@echo "Installed $(SERVICE_NAME). Start it with: systemctl enable --now $(SERVICE_NAME)"
+
+.PHONY: service-check
+# check installed binary, assets, and systemd service file
+service-check:
+	@test -x "$(DESTDIR)$(BINDIR)/simple_auth" || (echo "missing executable: $(DESTDIR)$(BINDIR)/simple_auth" && exit 1)
+	@test -f "$(DESTDIR)$(APP_DIR)/configs/config.yaml" || (echo "missing config: $(DESTDIR)$(APP_DIR)/configs/config.yaml" && exit 1)
+	@test -f "$(DESTDIR)$(APP_DIR)/templates/login.html" || (echo "missing template: $(DESTDIR)$(APP_DIR)/templates/login.html" && exit 1)
+	@test -f "$(DESTDIR)$(SYSTEMD_DIR)/$(SERVICE_NAME)" || (echo "missing service: $(DESTDIR)$(SYSTEMD_DIR)/$(SERVICE_NAME)" && exit 1)
+	@"$(DESTDIR)$(BINDIR)/simple_auth" -h >/dev/null
+	@if command -v systemd-analyze >/dev/null 2>&1 && [ -z "$(DESTDIR)" ]; then \
+		systemd-analyze verify "$(SYSTEMD_DIR)/$(SERVICE_NAME)"; \
+	else \
+		echo "Skip systemd-analyze verify."; \
+	fi
+	@if command -v systemctl >/dev/null 2>&1 && [ -z "$(DESTDIR)" ]; then \
+		systemctl cat "$(SERVICE_NAME)" >/dev/null; \
+	else \
+		echo "Skip systemctl unit lookup."; \
+	fi
+	@echo "Service install check passed."
 
 .PHONY: generate
 # generate
