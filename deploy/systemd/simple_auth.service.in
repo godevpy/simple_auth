@@ -6,7 +6,7 @@ After=network-online.target redis.service
 [Service]
 Type=simple
 WorkingDirectory=@APP_DIR@
-ExecStart=@BINDIR@/simple_auth -conf @APP_DIR@/configs
+ExecStart=@BINDIR@/simple_auth -conf @APP_DIR@/configs/config.yaml
 Restart=on-failure
 RestartSec=5s
 
