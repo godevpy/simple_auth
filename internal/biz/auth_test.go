@@ -3,6 +3,7 @@ package biz
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -150,6 +151,51 @@ func TestAuthorizationWildcard(t *testing.T) {
 		User:   &User{Username: "alice"},
 	}) {
 		t.Fatal("expected wildcard rule to allow request")
+	}
+}
+
+func TestAuthorizationEvaluateExplainsDecision(t *testing.T) {
+	az, err := NewAuthorizationUsecase(testBootstrap(t))
+	if err != nil {
+		t.Fatalf("NewAuthorizationUsecase() error = %v", err)
+	}
+
+	deniedPath := az.Evaluate(AuthorizationInput{
+		Host:   "app.example.com",
+		URI:    "/unknown?x=1",
+		Method: "GET",
+		User:   &User{ID: "user-001", Username: "alice", Groups: []string{"admin"}},
+	})
+	if deniedPath.Allowed {
+		t.Fatal("expected unknown path to be denied")
+	}
+	if deniedPath.Reason != "no_matching_rule" {
+		t.Fatalf("denied path reason = %q", deniedPath.Reason)
+	}
+	if deniedPath.Path != "/unknown" {
+		t.Fatalf("denied path normalized path = %q", deniedPath.Path)
+	}
+	if got := deniedPath.RuleChecks[0].Reason; got != "path_not_match" {
+		t.Fatalf("first rule reason = %q", got)
+	}
+
+	deniedUser := az.Evaluate(AuthorizationInput{
+		Host:   "app.example.com",
+		URI:    "/admin/dashboard",
+		Method: "GET",
+		User:   &User{ID: "user-002", Username: "bob", Groups: []string{"dev"}},
+	})
+	if deniedUser.Allowed {
+		t.Fatal("expected user without admin group to be denied")
+	}
+	if deniedUser.Reason != "user_not_allowed" {
+		t.Fatalf("denied user reason = %q", deniedUser.Reason)
+	}
+	if deniedUser.Rule != "admin" {
+		t.Fatalf("denied user matched rule = %q", deniedUser.Rule)
+	}
+	if summary := deniedUser.LogSummary(); !strings.Contains(summary, "user=false") || !strings.Contains(summary, "reason=user_not_allowed") {
+		t.Fatalf("summary missing user denial details: %s", summary)
 	}
 }
 

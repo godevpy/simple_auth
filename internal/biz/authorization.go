@@ -33,6 +33,26 @@ type AuthorizationUsecase struct {
 	rules   []compiledRule
 }
 
+type AuthorizationDecision struct {
+	Allowed    bool
+	Enabled    bool
+	Reason     string
+	Host       string
+	Method     string
+	Path       string
+	Rule       string
+	RuleChecks []AuthorizationRuleCheck
+}
+
+type AuthorizationRuleCheck struct {
+	Name        string
+	HostMatch   bool
+	MethodMatch bool
+	PathMatch   bool
+	UserMatch   bool
+	Reason      string
+}
+
 func NewAuthorizationUsecase(c *conf.Bootstrap) (*AuthorizationUsecase, error) {
 	az := &AuthorizationUsecase{}
 	if c == nil || c.GetAuthorization() == nil {
@@ -71,19 +91,93 @@ func NewAuthorizationUsecase(c *conf.Bootstrap) (*AuthorizationUsecase, error) {
 }
 
 func (uc *AuthorizationUsecase) Allow(in AuthorizationInput) bool {
-	if uc == nil || !uc.enabled {
-		return true
+	return uc.Evaluate(in).Allowed
+}
+
+func (uc *AuthorizationUsecase) Evaluate(in AuthorizationInput) AuthorizationDecision {
+	decision := AuthorizationDecision{
+		Enabled: uc != nil && uc.enabled,
+		Host:    NormalizeHost(in.Host),
+		Method:  strings.ToUpper(strings.TrimSpace(in.Method)),
+		Path:    requestPath(in.URI),
 	}
-	host := NormalizeHost(in.Host)
-	method := strings.ToUpper(strings.TrimSpace(in.Method))
-	requestPath := requestPath(in.URI)
+	if uc == nil || !uc.enabled {
+		decision.Allowed = true
+		decision.Reason = "authorization_disabled"
+		return decision
+	}
+	decision.Reason = "no_matching_rule"
 	for _, rule := range uc.rules {
-		if !rule.matchHost(host) || !rule.matchMethod(method) || !rule.matchPath(requestPath) {
+		check := AuthorizationRuleCheck{
+			Name:        rule.name,
+			HostMatch:   rule.matchHost(decision.Host),
+			MethodMatch: rule.matchMethod(decision.Method),
+			PathMatch:   rule.matchPath(decision.Path),
+		}
+		check.UserMatch = check.HostMatch && check.MethodMatch && check.PathMatch && rule.matchUser(in.User)
+		check.Reason = check.rejectReason()
+		decision.RuleChecks = append(decision.RuleChecks, check)
+
+		if !check.HostMatch || !check.MethodMatch || !check.PathMatch {
 			continue
 		}
-		return rule.matchUser(in.User)
+		decision.Rule = rule.name
+		if check.UserMatch {
+			decision.Allowed = true
+			decision.Reason = "matched_rule"
+			return decision
+		}
+		decision.Reason = "user_not_allowed"
+		return decision
 	}
-	return false
+	return decision
+}
+
+func (d AuthorizationDecision) LogSummary() string {
+	parts := []string{
+		"enabled=" + boolString(d.Enabled),
+		"allowed=" + boolString(d.Allowed),
+		"reason=" + d.Reason,
+		"host=" + d.Host,
+		"method=" + d.Method,
+		"path=" + d.Path,
+	}
+	if d.Rule != "" {
+		parts = append(parts, "rule="+d.Rule)
+	}
+	if len(d.RuleChecks) > 0 {
+		checks := make([]string, 0, len(d.RuleChecks))
+		for _, check := range d.RuleChecks {
+			checks = append(checks, check.LogSummary())
+		}
+		parts = append(parts, "checks=["+strings.Join(checks, ";")+"]")
+	}
+	return strings.Join(parts, " ")
+}
+
+func (c AuthorizationRuleCheck) LogSummary() string {
+	return c.Name +
+		"{host=" + boolString(c.HostMatch) +
+		",method=" + boolString(c.MethodMatch) +
+		",path=" + boolString(c.PathMatch) +
+		",user=" + boolString(c.UserMatch) +
+		",reason=" + c.Reason +
+		"}"
+}
+
+func (c AuthorizationRuleCheck) rejectReason() string {
+	switch {
+	case !c.HostMatch:
+		return "host_not_match"
+	case !c.MethodMatch:
+		return "method_not_match"
+	case !c.PathMatch:
+		return "path_not_match"
+	case !c.UserMatch:
+		return "user_not_allowed"
+	default:
+		return "matched"
+	}
 }
 
 func (r compiledRule) matchHost(host string) bool {
@@ -209,4 +303,11 @@ func stringSet(values []string) map[string]struct{} {
 		}
 	}
 	return set
+}
+
+func boolString(value bool) string {
+	if value {
+		return "true"
+	}
+	return "false"
 }

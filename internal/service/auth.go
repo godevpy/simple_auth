@@ -111,7 +111,7 @@ func (s *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 	})
 	if err != nil {
 		if errors.Is(err, biz.ErrInvalidCredentials) {
-			s.log.Warnf("login response: status=401 username=%s ip=%s host=%s", username, clientIP(r), originalHost(r))
+			s.log.Warnf("login invalid，login response: status=401 username=%s ip=%s host=%s", username, clientIP(r), originalHost(r))
 			s.renderLogin(w, http.StatusUnauthorized, redirect, "用户名或密码错误")
 			return
 		}
@@ -120,7 +120,7 @@ func (s *AuthService) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.SetCookie(w, s.sessionCookie(result.SessionID, int(time.Until(result.Session.ExpiresAt).Seconds())))
-	s.log.Infof("login response: status=302 username=%s user_id=%s ip=%s redirect=%s", result.Session.Username, result.Session.UserID, clientIP(r), redirect)
+	s.log.Infof("login success，response: status=302 username=%s user_id=%s ip=%s redirect=%s", result.Session.Username, result.Session.UserID, clientIP(r), redirect)
 	http.Redirect(w, r, redirect, http.StatusFound)
 }
 
@@ -147,10 +147,10 @@ func (s *AuthService) Verify(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch {
 		case errors.Is(err, biz.ErrUnauthorized):
-			s.log.Debugf("verify response: status=401 host=%s uri=%s method=%s ip=%s", originalHost(r), originalURI(r), originalMethod(r), clientIP(r))
+			s.log.Debugf("verify response: status=401 reason=ErrUnauthorized, host=%s uri=%s method=%s ip=%s", originalHost(r), originalURI(r), originalMethod(r), clientIP(r))
 			w.WriteHeader(http.StatusUnauthorized)
 		case errors.Is(err, biz.ErrForbidden):
-			s.log.Warnf("verify response: status=403 host=%s uri=%s method=%s ip=%s", originalHost(r), originalURI(r), originalMethod(r), clientIP(r))
+			s.log.Warnf("verify response: status=403 reason=ErrForbidden host=%s uri=%s method=%s ip=%s", originalHost(r), originalURI(r), originalMethod(r), clientIP(r))
 			w.WriteHeader(http.StatusForbidden)
 		default:
 			s.log.Errorf("verify failed: %v", err)

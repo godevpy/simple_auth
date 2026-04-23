@@ -314,13 +314,14 @@ func (uc *AuthUsecase) Verify(ctx context.Context, in VerifyInput) (*Session, er
 		uc.log.Infof("verify rejected: reason=session_expired username=%s user_id=%s host=%s uri=%s method=%s", session.Username, session.UserID, NormalizeHost(in.Host), in.URI, in.Method)
 		return nil, ErrUnauthorized
 	}
-	if !uc.authorizer.Allow(AuthorizationInput{
+	authz := uc.authorizer.Evaluate(AuthorizationInput{
 		Host:   in.Host,
 		URI:    in.URI,
 		Method: in.Method,
 		User:   session.User(),
-	}) {
-		uc.log.Warnf("verify rejected: reason=forbidden username=%s user_id=%s host=%s uri=%s method=%s ip=%s", session.Username, session.UserID, NormalizeHost(in.Host), in.URI, in.Method, in.ClientIP)
+	})
+	if !authz.Allowed {
+		uc.log.Warnf("verify rejected: reason=forbidden username=%s user_id=%s ip=%s authz=\"%s\"", session.Username, session.UserID, in.ClientIP, authz.LogSummary())
 		return nil, ErrForbidden
 	}
 	if uc.cfg.SlidingExpiration {
@@ -329,7 +330,7 @@ func (uc *AuthUsecase) Verify(ctx context.Context, in VerifyInput) (*Session, er
 			return nil, err
 		}
 	}
-	uc.log.Debugf("verify allowed: username=%s user_id=%s host=%s uri=%s method=%s", session.Username, session.UserID, NormalizeHost(in.Host), in.URI, in.Method)
+	uc.log.Debugf("verify allowed: username=%s user_id=%s authz=\"%s\"", session.Username, session.UserID, authz.LogSummary())
 	return session, nil
 }
 
