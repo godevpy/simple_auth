@@ -41,7 +41,7 @@ authorization:
 #        - admin.example.com
       path_match: prefix
       paths:
-        - /admin/
+        - /
       methods:
         - GET
         - POST
